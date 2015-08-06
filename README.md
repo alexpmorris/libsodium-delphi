@@ -14,7 +14,7 @@ Crypto is very tricky to implement correctly.  With this library, you are much m
 
 ## Documentation
 
-Between the Delphi demo application, and the [original libsodium documentation library](http://doc.libsodium.org/) written by Frank Denis ([@jedisct1](https://github.com/jedisct1))), you should have all you need to get going.
+Between the Delphi demo application, and the [original libsodium documentation library](http://doc.libsodium.org/) written by Frank Denis ([@jedisct1](https://github.com/jedisct1)), you should have all you need to get going.
 
 ## Requirements & Versions
 
