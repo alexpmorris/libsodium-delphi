@@ -262,9 +262,7 @@ end;
 
 procedure LibSodiumRandomDemo;
 var buf: array[0..7] of byte;
-    i,j: integer;
-    s: string;
-    ts:tstringlist;
+    i: integer;
 begin
 
   write('randombytes_buf(8) = ');
@@ -274,16 +272,6 @@ begin
   write('randombytes_buf(8) = ');
   randombytes_buf(@buf,8);
   for i:= 0 to 7 do write(buf[i],' '); writeln;
-
-  {for i := 1 to 1000000 do begin
-    //randombytes_buf(@buf,8);
-    for j:=0 to 7 do buf[j]:=random(256);
-    for j:= 0 to 7 do s:=s+chr(buf[j]);
-   end;
-  ts:=tstringlist.create;
-  ts.text:=s;
-  ts.savetofile('ent_test');
-  ts.free;}
 
   writeln('randombytes_uniform(0..1000) = ',randombytes_uniform(1000));
   writeln('randombytes_uniform(0..1000000) = ',randombytes_uniform(1000000));
