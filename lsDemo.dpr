@@ -108,6 +108,9 @@ begin
 end;
 
 
+//NOTE: cryptBuf and testMessage can overlap, making in-place encryption possible (no need for 2 buffers).
+//      However do not forget that crypto_secretbox_MACBYTES extra bytes are required
+//      to prepend the tag.
 //http://doc.libsodium.org/secret-key_cryptography/aead.html
 procedure LibSodiumAeadChacha20poly1305Demo;
 var testMessage,cryptBuf,additionalData: AnsiString;
@@ -142,6 +145,9 @@ begin
 end;
 
 
+//NOTE: cryptBuf and testMessage can overlap, making in-place encryption possible (no need for 2 buffers).
+//      However do not forget that crypto_secretbox_MACBYTES extra bytes are required
+//      to prepend the tag.
 //http://doc.libsodium.org/secret-key_cryptography/authenticated_encryption.html
 procedure LibSodiumCryptoSecretBoxDemo;
 var testMessage,cryptBuf: AnsiString;
