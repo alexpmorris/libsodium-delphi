@@ -109,7 +109,7 @@ end;
 
 
 //NOTE: cryptBuf and testMessage can overlap, making in-place encryption possible (no need for 2 buffers).
-//      However do not forget that crypto_secretbox_MACBYTES extra bytes are required
+//      However do not forget that ls_crypto_aead_chacha20poly1305_ABYTES extra bytes are required
 //      to prepend the tag.
 //http://doc.libsodium.org/secret-key_cryptography/aead.html
 procedure LibSodiumAeadChacha20poly1305Demo;
@@ -146,7 +146,7 @@ end;
 
 
 //NOTE: cryptBuf and testMessage can overlap, making in-place encryption possible (no need for 2 buffers).
-//      However do not forget that crypto_secretbox_MACBYTES extra bytes are required
+//      However do not forget that ls_crypto_secretbox_MACBYTES extra bytes are required
 //      to prepend the tag.
 //http://doc.libsodium.org/secret-key_cryptography/authenticated_encryption.html
 procedure LibSodiumCryptoSecretBoxDemo;
