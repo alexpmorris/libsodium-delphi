@@ -2,9 +2,10 @@ program lsDemo;
 {$apptype console}
 
 //
-// by Alexander Paul Morris, 2015-08-06
+// by Alexander Paul Morris, 2015-08-08
 //
-// demos for Delphi wrapper to libsodium.dll
+//   demos for Delphi wrapper to 32-bit and 64-bit libsodium.dll crypto library
+//
 //
 
 uses SysUtils, Classes, WinTypes, LibSodium;
@@ -286,14 +287,18 @@ end;
 
 
 procedure TestLibSodium;
-var lsHandle: integer;
-    rb: randombytes_implementation;
+var rb: randombytes_implementation;
     buf: array[0..7] of byte;
     i: integer;
 begin
-  lsHandle := sodium_init;
+  if (not sodium_DLLLoaded) then begin
+    writeln('Fatal Error: could not load "'+sodium_dllFileName+'"!');
+    halt;
+  end;
 
-  writeln('delphi wrapper/bridge to libsodium.dll version = ',sodium_version_string);
+  sodium_init;
+
+  writeln('delphi wrapper/bridge to '+sodium_dllFileName+' version = ',sodium_version_string);
   writeln;
 
   LibSodiumRandomDemo;

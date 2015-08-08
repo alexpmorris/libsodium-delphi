@@ -1,8 +1,8 @@
 //  Delphi Wrapper for libsodium.dll
-//    should work with most versions of 32-bit Delphi/FreePascal
-//    64-bit port should be relatively easy using libsodium64.dll instead
+//    should work with most versions of 32-bit and 64-bit Delphi/FreePascal
+//    for 64-bit, tries to load libsodium64.dll instead of libsodium.dll, if available
 //
-//  by Alexander Paul Morris, 2015-08-06
+//  by Alexander Paul Morris, 2015-08-08
 //
 //  based on libsodium 1.0.3 C DLL header files
 //    sodium_increment() should also work once libsodium 1.0.4 is released
@@ -24,6 +24,10 @@
 //  complete libsodium implementation in javascript using Emscripten:
 //  https://github.com/jedisct1/libsodium.js
 //
+//  the latest libsodium library releases can be found here:
+//  http://download.libsodium.org/libsodium/releases/
+//
+//  v0.11 - 2015-08-08, a few minor changes for 64-bit compatibility
 //  v0.10 - 2015-08-06, initial release
 //
 
@@ -36,14 +40,7 @@ unit libsodium;
 
 interface
 
-uses
-{$IFDEF WIN32}
-  Windows;
-{$ELSE}
-  Wintypes, WinProcs;
-{$ENDIF}
-
-const dllFileName = 'libsodium.dll';
+uses SysUtils, Wintypes, WinProcs;
 
 {=> LIBSODIUM.H <=}
 
@@ -1824,10 +1821,12 @@ var
 
 
 var
-  DLLLoaded: Boolean { is DLL (dynamically) loaded already? }
-    {$IFDEF WIN32} = False; {$ENDIF}
+  sodium_dllLoaded: Boolean = False;  { is DLL (dynamically) loaded already? }
+  sodium_dllFileName: AnsiString = 'libsodium.dll';
+
 
 implementation
+
 
 var
   SaveExit: pointer;
@@ -1844,14 +1843,21 @@ var
 
 procedure LoadDLL;
 begin
-  if DLLLoaded then Exit;
+  if sodium_dllLoaded then Exit;
 {$IFNDEF MSDOS}
   ErrorMode := SetErrorMode($8000{SEM_NoOpenFileErrorBox});
 {$ENDIF}
-  DLLHandle := LoadLibrary(dllFileName);
+{$IFDEF WIN64}
+  if FileExists('libsodium64.dll') then sodium_dllFileName := 'libsodium64.dll';
+{$ENDIF}
+{$IF CompilerVersion >= 20.0} { Delphi 2009 unicode }
+  DLLHandle := LoadLibrary(PWideChar(WideString(sodium_dllFileName)));
+{$ELSE}
+  DLLHandle := LoadLibrary(PAnsiChar(sodium_dllFileName));
+{$IFEND}
   if DLLHandle >= 32 then
   begin
-    DLLLoaded := True;
+    sodium_dllLoaded := True;
     SaveExit := ExitProc;
     ExitProc := @NewExit;
     @sodium_init := GetProcAddress(DLLHandle,'sodium_init');
@@ -3126,7 +3132,7 @@ begin
   end
   else
   begin
-    DLLLoaded := False;
+    sodium_dllLoaded := False;
     { Error: LIBSODIUM.DLL could not be loaded !! }
   end;
 {$IFNDEF MSDOS}

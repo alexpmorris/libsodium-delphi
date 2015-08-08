@@ -18,9 +18,7 @@ Between the Delphi demo application, and the [original libsodium documentation l
 
 ## Requirements & Versions
 
-This version is based on the 32-bit libsodium library version 1.0.3.  sodium_increment() has been implemented as well, and should work once version 1.0.4 is officially released.
-
-While not currently implemented, it shouldn't be too hard to port the wrapper to work with the 64-bit libsodium64.dll as well.
+libsodium-delphi works with either the 32-bit or 64-bit libsodium.dll library version 1.0.3.  sodium_increment() has been implemented as well, and should work once version 1.0.4 is officially released.
 
 ## License
 
