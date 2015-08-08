@@ -291,7 +291,7 @@ var rb: randombytes_implementation;
     buf: array[0..7] of byte;
     i: integer;
 begin
-  if (not sodium_DLLLoaded) then begin
+  if (not sodium_dllLoaded) then begin
     writeln('Fatal Error: could not load "'+sodium_dllFileName+'"! Missing a Dependency?');
     writeln('ie. MSVC v100 runtime requires mfc100.dll, msvcp100.dll, and msvcr100.dll');
     halt;
