@@ -3133,7 +3133,9 @@ begin
   else
   begin
     sodium_dllLoaded := False;
-    { Error: LIBSODIUM.DLL could not be loaded !! }
+    // Error: LIBSODIUM.DLL could not be loaded!
+    //   make sure appropriate runtime libraries are available!
+    //   ie. MSVC v100 libsodium.dll requires mfc100.dll, msvcp100.dll, and msvcr100.dll 
   end;
 {$IFNDEF MSDOS}
   SetErrorMode(ErrorMode)

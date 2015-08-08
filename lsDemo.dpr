@@ -292,7 +292,8 @@ var rb: randombytes_implementation;
     i: integer;
 begin
   if (not sodium_DLLLoaded) then begin
-    writeln('Fatal Error: could not load "'+sodium_dllFileName+'"!');
+    writeln('Fatal Error: could not load "'+sodium_dllFileName+'"! Missing a Dependency?');
+    writeln('ie. MSVC v100 runtime requires mfc100.dll, msvcp100.dll, and msvcr100.dll');
     halt;
   end;
 
@@ -305,7 +306,7 @@ begin
   writeln;
 
   LibSodiumHmacSha2AuthDemo;
-  Writeln;
+  writeln;
 
   LibSodiumAeadChacha20poly1305Demo;
   writeln;
