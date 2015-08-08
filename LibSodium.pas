@@ -392,10 +392,10 @@ type
   Tcrypto_auth_hmacsha512256_final = function(var state: CRYPTO_AUTH_HMACSHA512256_STATE;
                                               const outBuf: PAnsiChar): Integer cdecl;
 
-  // * THREAD SAFETY: crypto_box_keypair() is thread-safe, }
-  // * provided that you called sodium_init() once before using any }
-  // * other libsodium function. }
-  // * Other functions are always thread-safe. }
+  // * THREAD SAFETY: crypto_box_keypair() is thread-safe,
+  // * provided that you called sodium_init() once before using any
+  // * other libsodium function.
+  // * Other functions are always thread-safe.
 
   Tcrypto_box_seedbytes = function: dwSIZE_T cdecl;
 
@@ -720,10 +720,10 @@ type
                                                const outBuf: PAnsiChar;
                                                const outlen: dwSIZE_T): Integer cdecl;
 
-  // * WARNING: Unless you absolutely need to use SHA512 for interoperatibility, }
-  // * purposes, you might want to consider crypto_generichash() instead. }
-  // * Unlike SHA512, crypto_generichash() is not vulnerable to length }
-  // * extension attacks. }
+  // * WARNING: Unless you absolutely need to use SHA512 for interoperatibility,
+  // * purposes, you might want to consider crypto_generichash() instead.
+  // * Unlike SHA512, crypto_generichash() is not vulnerable to length
+  // * extension attacks.
 
   Tcrypto_hash_bytes = function: dwSIZE_T cdecl;
 
@@ -733,10 +733,10 @@ type
 
   Tcrypto_hash_primitive = function: PAnsiChar cdecl;
 
-  // * WARNING: Unless you absolutely need to use SHA256 for interoperatibility, }
-  // * purposes, you might want to consider crypto_generichash() instead. }
-  // * Unlike SHA256, crypto_generichash() is not vulnerable to length }
-  // * extension attacks. }
+  // * WARNING: Unless you absolutely need to use SHA256 for interoperatibility,
+  // * purposes, you might want to consider crypto_generichash() instead.
+  // * Unlike SHA256, crypto_generichash() is not vulnerable to length
+  // * extension attacks.
 
   Tcrypto_hash_sha256_statebytes = function: dwSIZE_T cdecl;
 
@@ -755,10 +755,10 @@ type
   Tcrypto_hash_sha256_final = function(var state: CRYPTO_HASH_SHA256_STATE;
                                        const outBuf: PAnsiChar): Integer cdecl;
 
-  // * WARNING: Unless you absolutely need to use SHA512 for interoperatibility, }
-  // * purposes, you might want to consider crypto_generichash() instead. }
-  // * Unlike SHA512, crypto_generichash() is not vulnerable to length }
-  // * extension attacks. }
+  // * WARNING: Unless you absolutely need to use SHA512 for interoperatibility,
+  // * purposes, you might want to consider crypto_generichash() instead.
+  // * Unlike SHA512, crypto_generichash() is not vulnerable to length
+  // * extension attacks.
 
   Tcrypto_hash_sha512_statebytes = function: dwSIZE_T cdecl;
 
@@ -1005,10 +1005,10 @@ type
                                          inlen: UINT64;
                                          const k: PAnsiChar): Integer cdecl;
 
-  // * THREAD SAFETY: crypto_sign_keypair() is thread-safe, }
-  // * provided that you called sodium_init() once before using any }
-  // * other libsodium function. }
-  // * Other functions, including crypto_sign_seed_keypair() are always thread-safe. }
+  // * THREAD SAFETY: crypto_sign_keypair() is thread-safe,
+  // * provided that you called sodium_init() once before using any
+  // * other libsodium function.
+  // * Other functions, including crypto_sign_seed_keypair() are always thread-safe.
 
   Tcrypto_sign_bytes = function: dwSIZE_T cdecl;
 
@@ -1100,14 +1100,14 @@ type
   Tcrypto_sign_ed25519_sk_to_pk = function(const pk: PAnsiChar;
                                            const sk: PAnsiChar): Integer cdecl;
 
-  // * WARNING: This construction was a prototype, which should not be used }
-  // * any more in new projects. }
-  // * }
-  // * crypto_sign_edwards25519sha512batch is provided for applications }
-  // * initially built with NaCl, but as recommended by the author of this }
-  // * construction, new applications should use ed25519 instead. }
-  // * }
-  // * In Sodium, you should use the high-level crypto_sign_*() functions instead. }
+  // * WARNING: This construction was a prototype, which should not be used
+  // * any more in new projects.
+  // *
+  // * crypto_sign_edwards25519sha512batch is provided for applications
+  // * initially built with NaCl, but as recommended by the author of this
+  // * construction, new applications should use ed25519 instead.
+  // *
+  // * In Sodium, you should use the high-level crypto_sign_*() functions instead.
 
   Tcrypto_sign_edwards25519sha512batch_bytes = function: dwSIZE_T cdecl;
 
@@ -1131,11 +1131,11 @@ type
                                                           const sk: PAnsiChar): Integer cdecl;
 
 
-  // * WARNING: This is just a stream cipher. It is NOT authenticated encryption. }
-  // * While it provides some protection against eavesdropping, it does NOT }
-  // * provide any security against active attacks. }
-  // * Unless you know what you're doing, what you are looking for is probably }
-  // * the crypto_box functions. }
+  // * WARNING: This is just a stream cipher. It is NOT authenticated encryption.
+  // * While it provides some protection against eavesdropping, it does NOT
+  // * provide any security against active attacks.
+  // * Unless you know what you're doing, what you are looking for is probably
+  // * the crypto_box functions.
 
   Tcrypto_stream_keybytes = function: dwSIZE_T cdecl;
 
@@ -1154,11 +1154,11 @@ type
                                 const n: PAnsiChar;
                                 const k: PAnsiChar): Integer cdecl;
 
-  // * WARNING: This is just a stream cipher. It is NOT authenticated encryption. }
-  // * While it provides some protection against eavesdropping, it does NOT }
-  // * provide any security against active attacks. }
-  // * Unless you know what you're doing, what you are looking for is probably }
-  // * the crypto_box functions. }
+  // * WARNING: This is just a stream cipher. It is NOT authenticated encryption.
+  // * While it provides some protection against eavesdropping, it does NOT
+  // * provide any security against active attacks.
+  // * Unless you know what you're doing, what you are looking for is probably
+  // * the crypto_box functions.
 
   Tcrypto_stream_aes128ctr_keybytes = function: dwSIZE_T cdecl;
 
@@ -1191,11 +1191,11 @@ type
                                                   const nonce: PAnsiChar;
                                                   const c: PAnsiChar): Integer cdecl;
 
-  // * WARNING: This is just a stream cipher. It is NOT authenticated encryption. }
-  // * While it provides some protection against eavesdropping, it does NOT }
-  // * provide any security against active attacks. }
-  // * Unless you know what you're doing, what you are looking for is probably }
-  // * the crypto_box functions. }
+  // * WARNING: This is just a stream cipher. It is NOT authenticated encryption.
+  // * While it provides some protection against eavesdropping, it does NOT
+  // * provide any security against active attacks.
+  // * Unless you know what you're doing, what you are looking for is probably
+  // * the crypto_box functions.
 
   Tcrypto_stream_chacha20_keybytes = function: dwSIZE_T cdecl;
 
@@ -1219,11 +1219,11 @@ type
                                             ic: UINT64;
                                             const k: PAnsiChar): Integer cdecl;
 
-  // * WARNING: This is just a stream cipher. It is NOT authenticated encryption. }
-  // * While it provides some protection against eavesdropping, it does NOT }
-  // * provide any security against active attacks. }
-  // * Unless you know what you're doing, what you are looking for is probably }
-  // * the crypto_box functions. }
+  // * WARNING: This is just a stream cipher. It is NOT authenticated encryption.
+  // * While it provides some protection against eavesdropping, it does NOT
+  // * provide any security against active attacks.
+  // * Unless you know what you're doing, what you are looking for is probably
+  // * the crypto_box functions.
 
   Tcrypto_stream_salsa20_keybytes = function: dwSIZE_T cdecl;
 
@@ -1247,11 +1247,11 @@ type
                                            ic: UINT64;
                                            const k: PAnsiChar): Integer cdecl;
 
-  // * WARNING: This is just a stream cipher. It is NOT authenticated encryption. }
-  // * While it provides some protection against eavesdropping, it does NOT }
-  // * provide any security against active attacks. }
-  // * Unless you know what you're doing, what you are looking for is probably }
-  // * the crypto_box functions. }
+  // * WARNING: This is just a stream cipher. It is NOT authenticated encryption.
+  // * While it provides some protection against eavesdropping, it does NOT
+  // * provide any security against active attacks.
+  // * Unless you know what you're doing, what you are looking for is probably
+  // * the crypto_box functions. 
 
   Tcrypto_stream_salsa2012_keybytes = function: dwSIZE_T cdecl;
 
@@ -1268,11 +1268,11 @@ type
                                           const n: PAnsiChar;
                                           const k: PAnsiChar): Integer cdecl;
 
-  // * WARNING: This is just a stream cipher. It is NOT authenticated encryption. }
-  // * While it provides some protection against eavesdropping, it does NOT }
-  // * provide any security against active attacks. }
-  // * Unless you know what you're doing, what you are looking for is probably }
-  // * the crypto_box functions. }
+  // * WARNING: This is just a stream cipher. It is NOT authenticated encryption.
+  // * While it provides some protection against eavesdropping, it does NOT
+  // * provide any security against active attacks.
+  // * Unless you know what you're doing, what you are looking for is probably
+  // * the crypto_box functions. 
 
   Tcrypto_stream_salsa208_keybytes = function: dwSIZE_T cdecl;
 
@@ -1289,11 +1289,11 @@ type
                                          const n: PAnsiChar;
                                          const k: PAnsiChar): Integer cdecl;
 
-  // * WARNING: This is just a stream cipher. It is NOT authenticated encryption. }
-  // * While it provides some protection against eavesdropping, it does NOT }
-  // * provide any security against active attacks. }
-  // * Unless you know what you're doing, what you are looking for is probably }
-  // * the crypto_box functions. }
+  // * WARNING: This is just a stream cipher. It is NOT authenticated encryption.
+  // * While it provides some protection against eavesdropping, it does NOT
+  // * provide any security against active attacks.
+  // * Unless you know what you're doing, what you are looking for is probably
+  // * the crypto_box functions. 
 
   Tcrypto_stream_xsalsa20_keybytes = function: dwSIZE_T cdecl;
 
@@ -1361,9 +1361,9 @@ type
   Trandombytes = procedure(const buf: PAnsiChar;
                            const buf_len: UINT64) cdecl;
 
-  // * THREAD SAFETY: randombytes_salsa20_random*() functions are }
-  // * fork()-safe but not thread-safe. }
-  // * Always wrap them in a mutex if you need thread safety. }
+  // * THREAD SAFETY: randombytes_salsa20_random*() functions are
+  // * fork()-safe but not thread-safe.
+  // * Always wrap them in a mutex if you need thread safety. 
 
   Trandombytes_salsa20_implementation_name = function: PAnsiChar cdecl;
 
@@ -1378,9 +1378,9 @@ type
 
   Trandombytes_salsa20_random_close = function: Integer cdecl;
 
-  // * THREAD SAFETY: randombytes_sysrandom() functions are thread-safe, }
-  // * provided that you called sodium_init() once before using any }
-  // * other libsodium function. }
+  // * THREAD SAFETY: randombytes_sysrandom() functions are thread-safe,
+  // * provided that you called sodium_init() once before using any
+  // * other libsodium function.
 
   Trandombytes_sysrandom_implementation_name = function: PAnsiChar cdecl;
 
@@ -1410,8 +1410,8 @@ type
   // * are equal, in constant time.
   // * It returns 0 if the keys are equal, and -1 if they differ.
   // * This function is not designed for lexicographical comparisons.
-
-  // http://codahale.com/a-lesson-in-timing-attacks/
+  // *
+  // * http://codahale.com/a-lesson-in-timing-attacks/
 
   Tsodium_memcmp = function(const b1_: PAnsiChar;
                             const b2_: PAnsiChar;
