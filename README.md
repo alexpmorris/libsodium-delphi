@@ -22,4 +22,4 @@ libsodium-delphi works with either the 32-bit or 64-bit libsodium.dll library ve
 
 ## License
 
-NaCl has been released to the public domain to avoid copyright issues. libsodium is subject to the [ISC license](https://en.wikipedia.org/wiki/ISC_license), and this software is subject to the MIT license (see LICENSE).
+NaCl has been released to the public domain to avoid copyright issues. libsodium is subject to the [ISC license](https://en.wikipedia.org/wiki/ISC_license), and this software is subject to the MIT license (see [license](https://github.com/alexpmorris/libsodium-delphi/blob/master/license)).
