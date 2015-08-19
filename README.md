@@ -1,4 +1,4 @@
-# libsodium-delphi [![License](http://img.shields.io/badge/license-MIT-green.svg)](https://github.com/adamcaudill/libsodium-net/blob/master/LICENSE)
+# libsodium-delphi [![License](http://img.shields.io/badge/license-MIT-green.svg)](https://github.com/alexpmorris/libsodium-delphi/blob/master/license)
 
 libsodium-delphi, or [libsodium](https://github.com/jedisct1/libsodium) for Delphi, is a Delphi/FreePascal wrapper around libsodium.  libsodium is a portable and relatively easy to use implementation of [Daniel Bernstein's](http://cr.yp.to/djb.html) fantastic [NaCl](http://nacl.cr.yp.to/) library.
 
