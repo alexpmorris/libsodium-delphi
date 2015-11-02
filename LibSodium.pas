@@ -809,8 +809,6 @@ type
 
   Tcrypto_onetimeauth_poly1305_keybytes = function: dwSIZE_T cdecl;
 
-  Tcrypto_onetimeauth_poly1305_implementation_name = function: PAnsiChar cdecl;
-
   Tcrypto_onetimeauth_poly1305 = function(const outBuf: PAnsiChar;
                                           const inBuf: PAnsiChar;
                                           inlen: UINT64;
@@ -830,20 +828,6 @@ type
 
   Tcrypto_onetimeauth_poly1305_final = function(var state: CRYPTO_ONETIMEAUTH_POLY1305_STATE;
                                                 const outBuf: PAnsiChar): Integer cdecl;
-
-  crypto_onetimeauth_poly1305_implementation = packed record
-    implementation_name: Tcrypto_onetimeauth_poly1305_implementation_name;
-    onetimeauth: Tcrypto_onetimeauth;
-    onetimeauth_verify: Tcrypto_onetimeauth_verify;
-    onetimeauth_init: Tcrypto_onetimeauth_init;
-    onetimeauth_update: Tcrypto_onetimeauth_update;
-    onetimeauth_final: Tcrypto_onetimeauth_final;
-  end {crypto_onetimeauth_poly1305_implementation};
-
-
-  Tcrypto_onetimeauth_poly1305_set_implementation = function(var impl: CRYPTO_ONETIMEAUTH_POLY1305_IMPLEMENTATION): Integer cdecl;
-
-  Tcrypto_onetimeauth_pick_best_implementation = function: CRYPTO_ONETIMEAUTH_POLY1305_IMPLEMENTATION cdecl;
 
   Tcrypto_pwhash_scryptsalsa208sha256_saltbytes = function: dwSIZE_T cdecl;
 
@@ -1395,8 +1379,6 @@ type
 
   Trandombytes_sysrandom_close = function: Integer cdecl;
 
-  Tsodium_runtime_get_cpu_features = function: Integer cdecl;
-
   Tsodium_runtime_has_neon = function: Integer cdecl;
 
   Tsodium_runtime_has_sse2 = function: Integer cdecl;
@@ -1648,9 +1630,6 @@ var
   crypto_onetimeauth_final: Tcrypto_onetimeauth_final;
   crypto_onetimeauth_poly1305_bytes: Tcrypto_onetimeauth_poly1305_bytes;
   crypto_onetimeauth_poly1305_keybytes: Tcrypto_onetimeauth_poly1305_keybytes;
-  crypto_onetimeauth_poly1305_implementation_name: Tcrypto_onetimeauth_poly1305_implementation_name;
-  crypto_onetimeauth_poly1305_set_implementation: Tcrypto_onetimeauth_poly1305_set_implementation;
-  crypto_onetimeauth_pick_best_implementation: Tcrypto_onetimeauth_pick_best_implementation;
   crypto_onetimeauth_poly1305: Tcrypto_onetimeauth_poly1305;
   crypto_onetimeauth_poly1305_verify: Tcrypto_onetimeauth_poly1305_verify;
   crypto_onetimeauth_poly1305_init: Tcrypto_onetimeauth_poly1305_init;
@@ -1795,7 +1774,6 @@ var
   randombytes_sysrandom_uniform: Trandombytes_sysrandom_uniform;
   randombytes_sysrandom_buf: Trandombytes_sysrandom_buf;
   randombytes_sysrandom_close: Trandombytes_sysrandom_close;
-  sodium_runtime_get_cpu_features: Tsodium_runtime_get_cpu_features;
   sodium_runtime_has_neon: Tsodium_runtime_has_neon;
   sodium_runtime_has_sse2: Tsodium_runtime_has_sse2;
   sodium_runtime_has_sse3: Tsodium_runtime_has_sse3;
@@ -2460,18 +2438,6 @@ begin
   {$IFDEF WIN32}
     Assert(@crypto_onetimeauth_poly1305_keybytes <> nil);
   {$ENDIF}
-    @crypto_onetimeauth_poly1305_implementation_name := GetProcAddress(DLLHandle,'crypto_onetimeauth_poly1305_implementation_name');
-  {$IFDEF WIN32}
-    Assert(@crypto_onetimeauth_poly1305_implementation_name <> nil);
-  {$ENDIF}
-    @crypto_onetimeauth_poly1305_set_implementation := GetProcAddress(DLLHandle,'crypto_onetimeauth_poly1305_set_implementation');
-  {$IFDEF WIN32}
-    Assert(@crypto_onetimeauth_poly1305_set_implementation <> nil);
-  {$ENDIF}
-//    @crypto_onetimeauth_pick_best_implementation := GetProcAddress(DLLHandle,'crypto_onetimeauth_pick_best_implementation');
-//  {$IFDEF WIN32}
-//    Assert(@crypto_onetimeauth_pick_best_implementation <> nil);
-//  {$ENDIF}
     @crypto_onetimeauth_poly1305 := GetProcAddress(DLLHandle,'crypto_onetimeauth_poly1305');
   {$IFDEF WIN32}
     Assert(@crypto_onetimeauth_poly1305 <> nil);
@@ -3047,10 +3013,6 @@ begin
   @randombytes_sysrandom_close := GetProcAddress(DLLHandle,'randombytes_sysrandom_close');
 {$IFDEF WIN32}
   Assert(@randombytes_sysrandom_close <> nil);
-{$ENDIF}
-  @sodium_runtime_get_cpu_features := GetProcAddress(DLLHandle,'sodium_runtime_get_cpu_features');
-{$IFDEF WIN32}
-  Assert(@sodium_runtime_get_cpu_features <> nil);
 {$ENDIF}
   @sodium_runtime_has_neon := GetProcAddress(DLLHandle,'sodium_runtime_has_neon');
 {$IFDEF WIN32}
