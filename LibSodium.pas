@@ -5,7 +5,6 @@
 //  by Alexander Paul Morris, 2015-08-08
 //
 //  based on libsodium 1.0.3 C DLL header files
-//    sodium_increment() should also work once libsodium 1.0.4 is released
 //
 //  a bit of the initial grunt work performed by the very helpful
 //  HeadConv 4.20 (c) 2000 by Bob Swart (aka Dr.Bob - www.drbob42.com)
@@ -27,6 +26,7 @@
 //  the latest libsodium library releases can be found here:
 //  http://download.libsodium.org/libsodium/releases/
 //
+//  v0.12 - 2015-11-02, updated for deprecations and new features through libsodium 1.06
 //  v0.11 - 2015-08-08, a few minor changes for 64-bit compatibility
 //  v0.10 - 2015-08-06, initial release
 //
@@ -114,6 +114,7 @@ const
   ls_crypto_aead_chacha20poly1305_KEYBYTES = 32;
   ls_crypto_aead_chacha20poly1305_NSECBYTES = 0;
   ls_crypto_aead_chacha20poly1305_NPUBBYTES = 8;
+  ls_crypto_aead_chacha20poly1305_IETF_NPUBBYTES = 12;
   ls_crypto_aead_chacha20poly1305_ABYTES = 16;
 
   ls_crypto_auth_hmacsha512256_BYTES = 32;
@@ -247,6 +248,7 @@ const
   ls_crypto_stream_aes128ctr_BEFORENMBYTES = 1408;
   ls_crypto_stream_chacha20_KEYBYTES = 32;
   ls_crypto_stream_chacha20_NONCEBYTES = 8;
+  ls_crypto_stream_chacha20_IETF_NONCEBYTES = 12;
   ls_crypto_stream_salsa20_KEYBYTES = 32;
   ls_crypto_stream_salsa20_NONCEBYTES = 8;
   ls_crypto_stream_salsa2012_KEYBYTES = 32;
@@ -286,6 +288,28 @@ type
                                                    const k: PAnsiChar): Integer cdecl;
 
   Tcrypto_aead_chacha20poly1305_decrypt = function(const m: PAnsiChar;
+                                                   out mlen: UINT64;
+                                                   const nsec: PAnsiChar;
+                                                   const c: PAnsiChar;
+                                                   clen: UINT64;
+                                                   const ad: PAnsiChar;
+                                                   adlen: UINT64;
+                                                   const npub: PAnsiChar;
+                                                   const k: PAnsiChar): Integer cdecl;
+
+  Tcrypto_aead_chacha20poly1305_ietf_npubbytes = function: dwSIZE_T cdecl;
+
+  Tcrypto_aead_chacha20poly1305_ietf_encrypt = function(const c: PAnsiChar;
+                                                   out clen: UINT64;
+                                                   const m: PAnsiChar;
+                                                   mlen: UINT64;
+                                                   const ad: PAnsiChar;
+                                                   adlen: UINT64;
+                                                   const nsec: PAnsiChar;
+                                                   const npub: PAnsiChar;
+                                                   const k: PAnsiChar): Integer cdecl;
+
+  Tcrypto_aead_chacha20poly1305_ietf_decrypt = function(const m: PAnsiChar;
                                                    out mlen: UINT64;
                                                    const nsec: PAnsiChar;
                                                    const c: PAnsiChar;
@@ -809,8 +833,6 @@ type
 
   Tcrypto_onetimeauth_poly1305_keybytes = function: dwSIZE_T cdecl;
 
-  Tcrypto_onetimeauth_poly1305_implementation_name = function: PAnsiChar cdecl;
-
   Tcrypto_onetimeauth_poly1305 = function(const outBuf: PAnsiChar;
                                           const inBuf: PAnsiChar;
                                           inlen: UINT64;
@@ -830,20 +852,6 @@ type
 
   Tcrypto_onetimeauth_poly1305_final = function(var state: CRYPTO_ONETIMEAUTH_POLY1305_STATE;
                                                 const outBuf: PAnsiChar): Integer cdecl;
-
-  crypto_onetimeauth_poly1305_implementation = packed record
-    implementation_name: Tcrypto_onetimeauth_poly1305_implementation_name;
-    onetimeauth: Tcrypto_onetimeauth;
-    onetimeauth_verify: Tcrypto_onetimeauth_verify;
-    onetimeauth_init: Tcrypto_onetimeauth_init;
-    onetimeauth_update: Tcrypto_onetimeauth_update;
-    onetimeauth_final: Tcrypto_onetimeauth_final;
-  end {crypto_onetimeauth_poly1305_implementation};
-
-
-  Tcrypto_onetimeauth_poly1305_set_implementation = function(var impl: CRYPTO_ONETIMEAUTH_POLY1305_IMPLEMENTATION): Integer cdecl;
-
-  Tcrypto_onetimeauth_pick_best_implementation = function: CRYPTO_ONETIMEAUTH_POLY1305_IMPLEMENTATION cdecl;
 
   Tcrypto_pwhash_scryptsalsa208sha256_saltbytes = function: dwSIZE_T cdecl;
 
@@ -1197,6 +1205,8 @@ type
   // * Unless you know what you're doing, what you are looking for is probably
   // * the crypto_box functions.
 
+  // * ChaCha20 with a 64-bit nonce and a 64-bit counter, as originally designed  
+
   Tcrypto_stream_chacha20_keybytes = function: dwSIZE_T cdecl;
 
   Tcrypto_stream_chacha20_noncebytes = function: dwSIZE_T cdecl;
@@ -1218,6 +1228,28 @@ type
                                             const n: PAnsiChar;
                                             ic: UINT64;
                                             const k: PAnsiChar): Integer cdecl;
+
+  // * ChaCha20 with a 96-bit nonce and a 32-bit counter (IETF)
+
+  Tcrypto_stream_chacha20_ietf_noncebytes = function: dwSIZE_T cdecl;
+
+  Tcrypto_stream_chacha20_ietf = function(const c: PAnsiChar;
+                                          clen: UINT64;
+                                          const n: PAnsiChar;
+                                          const k: PAnsiChar): Integer cdecl;
+
+  Tcrypto_stream_chacha20_ietf_xor = function(const c: PAnsiChar;
+                                              const m: PAnsiChar;
+                                              mlen: UINT64;
+                                              const n: PAnsiChar;
+                                              const k: PAnsiChar): Integer cdecl;
+
+  Tcrypto_stream_chacha20_ietf_xor_ic = function(const c: PAnsiChar;
+                                                 const m: PAnsiChar;
+                                                 mlen: UINT64;
+                                                 const n: PAnsiChar;
+                                                 ic: UINT32;
+                                                 const k: PAnsiChar): Integer cdecl;
 
   // * WARNING: This is just a stream cipher. It is NOT authenticated encryption.
   // * While it provides some protection against eavesdropping, it does NOT
@@ -1395,8 +1427,6 @@ type
 
   Trandombytes_sysrandom_close = function: Integer cdecl;
 
-  Tsodium_runtime_get_cpu_features = function: Integer cdecl;
-
   Tsodium_runtime_has_neon = function: Integer cdecl;
 
   Tsodium_runtime_has_sse2 = function: Integer cdecl;
@@ -1493,8 +1523,16 @@ type
   Tsodium_free = procedure(ptr: Pointer) cdecl;
 
   //libsodium 1.0.4
+  Tsodium_compare = function(const b1: PAnsiChar;
+                             const b2: PAnsiChar;
+                             const len: dwSIZE_T): Integer cdecl;
+
   Tsodium_increment = procedure(const bin: PAnsiChar;
                                 const bin_len: dwSIZE_T) cdecl;
+
+  Tsodium_runtime_has_ssse3 = function: Integer cdecl;
+
+  Tsodium_runtime_has_sse41 = function: Integer cdecl;
 
 
 var
@@ -1505,6 +1543,9 @@ var
   crypto_aead_chacha20poly1305_abytes: Tcrypto_aead_chacha20poly1305_abytes;
   crypto_aead_chacha20poly1305_encrypt: Tcrypto_aead_chacha20poly1305_encrypt;
   crypto_aead_chacha20poly1305_decrypt: Tcrypto_aead_chacha20poly1305_decrypt;
+  crypto_aead_chacha20poly1305_ietf_npubbytes: Tcrypto_aead_chacha20poly1305_ietf_npubbytes;
+  crypto_aead_chacha20poly1305_ietf_encrypt: Tcrypto_aead_chacha20poly1305_ietf_encrypt;
+  crypto_aead_chacha20poly1305_ietf_decrypt: Tcrypto_aead_chacha20poly1305_ietf_decrypt;
   crypto_auth_bytes: Tcrypto_auth_bytes;
   crypto_auth_keybytes: Tcrypto_auth_keybytes;
   crypto_auth_primitive: Tcrypto_auth_primitive;
@@ -1648,9 +1689,6 @@ var
   crypto_onetimeauth_final: Tcrypto_onetimeauth_final;
   crypto_onetimeauth_poly1305_bytes: Tcrypto_onetimeauth_poly1305_bytes;
   crypto_onetimeauth_poly1305_keybytes: Tcrypto_onetimeauth_poly1305_keybytes;
-  crypto_onetimeauth_poly1305_implementation_name: Tcrypto_onetimeauth_poly1305_implementation_name;
-  crypto_onetimeauth_poly1305_set_implementation: Tcrypto_onetimeauth_poly1305_set_implementation;
-  crypto_onetimeauth_pick_best_implementation: Tcrypto_onetimeauth_pick_best_implementation;
   crypto_onetimeauth_poly1305: Tcrypto_onetimeauth_poly1305;
   crypto_onetimeauth_poly1305_verify: Tcrypto_onetimeauth_poly1305_verify;
   crypto_onetimeauth_poly1305_init: Tcrypto_onetimeauth_poly1305_init;
@@ -1751,6 +1789,10 @@ var
   crypto_stream_chacha20: Tcrypto_stream_chacha20;
   crypto_stream_chacha20_xor: Tcrypto_stream_chacha20_xor;
   crypto_stream_chacha20_xor_ic: Tcrypto_stream_chacha20_xor_ic;
+  crypto_stream_chacha20_ietf_noncebytes: Tcrypto_stream_chacha20_ietf_noncebytes;
+  crypto_stream_chacha20_ietf: Tcrypto_stream_chacha20_ietf;
+  crypto_stream_chacha20_ietf_xor: Tcrypto_stream_chacha20_ietf_xor;
+  crypto_stream_chacha20_ietf_xor_ic: Tcrypto_stream_chacha20_ietf_xor_ic;
   crypto_stream_salsa20_keybytes: Tcrypto_stream_salsa20_keybytes;
   crypto_stream_salsa20_noncebytes: Tcrypto_stream_salsa20_noncebytes;
   crypto_stream_salsa20: Tcrypto_stream_salsa20;
@@ -1795,7 +1837,6 @@ var
   randombytes_sysrandom_uniform: Trandombytes_sysrandom_uniform;
   randombytes_sysrandom_buf: Trandombytes_sysrandom_buf;
   randombytes_sysrandom_close: Trandombytes_sysrandom_close;
-  sodium_runtime_get_cpu_features: Tsodium_runtime_get_cpu_features;
   sodium_runtime_has_neon: Tsodium_runtime_has_neon;
   sodium_runtime_has_sse2: Tsodium_runtime_has_sse2;
   sodium_runtime_has_sse3: Tsodium_runtime_has_sse3;
@@ -1817,7 +1858,10 @@ var
   sodium_library_version_minor: Tsodium_library_version_minor;
 
   //libsodium 1.0.4
+  sodium_compare: Tsodium_compare;
   sodium_increment: Tsodium_increment;
+  sodium_runtime_has_ssse3: Tsodium_runtime_has_ssse3;
+  sodium_runtime_has_sse41: Tsodium_runtime_has_sse41;
 
 
 var
@@ -2460,18 +2504,6 @@ begin
   {$IFDEF WIN32}
     Assert(@crypto_onetimeauth_poly1305_keybytes <> nil);
   {$ENDIF}
-    @crypto_onetimeauth_poly1305_implementation_name := GetProcAddress(DLLHandle,'crypto_onetimeauth_poly1305_implementation_name');
-  {$IFDEF WIN32}
-    Assert(@crypto_onetimeauth_poly1305_implementation_name <> nil);
-  {$ENDIF}
-    @crypto_onetimeauth_poly1305_set_implementation := GetProcAddress(DLLHandle,'crypto_onetimeauth_poly1305_set_implementation');
-  {$IFDEF WIN32}
-    Assert(@crypto_onetimeauth_poly1305_set_implementation <> nil);
-  {$ENDIF}
-//    @crypto_onetimeauth_pick_best_implementation := GetProcAddress(DLLHandle,'crypto_onetimeauth_pick_best_implementation');
-//  {$IFDEF WIN32}
-//    Assert(@crypto_onetimeauth_pick_best_implementation <> nil);
-//  {$ENDIF}
     @crypto_onetimeauth_poly1305 := GetProcAddress(DLLHandle,'crypto_onetimeauth_poly1305');
   {$IFDEF WIN32}
     Assert(@crypto_onetimeauth_poly1305 <> nil);
@@ -3001,134 +3033,146 @@ begin
     Assert(@randombytes <> nil);
   {$ENDIF}
   @randombytes_salsa20_implementation_name := GetProcAddress(DLLHandle,'randombytes_salsa20_implementation_name');
-{$IFDEF WIN32}
-  Assert(@randombytes_salsa20_implementation_name <> nil);
-{$ENDIF}
-  @randombytes_salsa20_random := GetProcAddress(DLLHandle,'randombytes_salsa20_random');
-{$IFDEF WIN32}
-  Assert(@randombytes_salsa20_random <> nil);
-{$ENDIF}
-  @randombytes_salsa20_random_stir := GetProcAddress(DLLHandle,'randombytes_salsa20_random_stir');
-{$IFDEF WIN32}
-  Assert(@randombytes_salsa20_random_stir <> nil);
-{$ENDIF}
-//  @randombytes_salsa20_random_uniform := GetProcAddress(DLLHandle,'randombytes_salsa20_random_uniform');
-//{$IFDEF WIN32}
-//  Assert(@randombytes_salsa20_random_uniform <> nil);
-//{$ENDIF}
-  @randombytes_salsa20_random_buf := GetProcAddress(DLLHandle,'randombytes_salsa20_random_buf');
-{$IFDEF WIN32}
-  Assert(@randombytes_salsa20_random_buf <> nil);
-{$ENDIF}
-  @randombytes_salsa20_random_close := GetProcAddress(DLLHandle,'randombytes_salsa20_random_close');
-{$IFDEF WIN32}
-  Assert(@randombytes_salsa20_random_close <> nil);
-{$ENDIF}
-  @randombytes_sysrandom_implementation_name := GetProcAddress(DLLHandle,'randombytes_sysrandom_implementation_name');
-{$IFDEF WIN32}
-  Assert(@randombytes_sysrandom_implementation_name <> nil);
-{$ENDIF}
-  @randombytes_sysrandom := GetProcAddress(DLLHandle,'randombytes_sysrandom');
-{$IFDEF WIN32}
-  Assert(@randombytes_sysrandom <> nil);
-{$ENDIF}
-  @randombytes_sysrandom_stir := GetProcAddress(DLLHandle,'randombytes_sysrandom_stir');
-{$IFDEF WIN32}
-  Assert(@randombytes_sysrandom_stir <> nil);
-{$ENDIF}
-//  @randombytes_sysrandom_uniform := GetProcAddress(DLLHandle,'randombytes_sysrandom_uniform');
-//{$IFDEF WIN32}
-//  Assert(@randombytes_sysrandom_uniform <> nil);
-//{$ENDIF}
-  @randombytes_sysrandom_buf := GetProcAddress(DLLHandle,'randombytes_sysrandom_buf');
-{$IFDEF WIN32}
-  Assert(@randombytes_sysrandom_buf <> nil);
-{$ENDIF}
-  @randombytes_sysrandom_close := GetProcAddress(DLLHandle,'randombytes_sysrandom_close');
-{$IFDEF WIN32}
-  Assert(@randombytes_sysrandom_close <> nil);
-{$ENDIF}
-  @sodium_runtime_get_cpu_features := GetProcAddress(DLLHandle,'sodium_runtime_get_cpu_features');
-{$IFDEF WIN32}
-  Assert(@sodium_runtime_get_cpu_features <> nil);
-{$ENDIF}
-  @sodium_runtime_has_neon := GetProcAddress(DLLHandle,'sodium_runtime_has_neon');
-{$IFDEF WIN32}
-  Assert(@sodium_runtime_has_neon <> nil);
-{$ENDIF}
-  @sodium_runtime_has_sse2 := GetProcAddress(DLLHandle,'sodium_runtime_has_sse2');
-{$IFDEF WIN32}
-  Assert(@sodium_runtime_has_sse2 <> nil);
-{$ENDIF}
-  @sodium_runtime_has_sse3 := GetProcAddress(DLLHandle,'sodium_runtime_has_sse3');
-{$IFDEF WIN32}
-  Assert(@sodium_runtime_has_sse3 <> nil);
-{$ENDIF}
-  @sodium_memzero := GetProcAddress(DLLHandle,'sodium_memzero');
-{$IFDEF WIN32}
-  Assert(@sodium_memzero <> nil);
-{$ENDIF}
-  @sodium_memcmp := GetProcAddress(DLLHandle,'sodium_memcmp');
-{$IFDEF WIN32}
-  Assert(@sodium_memcmp <> nil);
-{$ENDIF}
-  @sodium_bin2hex := GetProcAddress(DLLHandle,'sodium_bin2hex');
-{$IFDEF WIN32}
-  Assert(@sodium_bin2hex <> nil);
-{$ENDIF}
-  @sodium_hex2bin := GetProcAddress(DLLHandle,'sodium_hex2bin');
-{$IFDEF WIN32}
-  Assert(@sodium_hex2bin <> nil);
-{$ENDIF}
-  @sodium_mlock := GetProcAddress(DLLHandle,'sodium_mlock');
-{$IFDEF WIN32}
-  Assert(@sodium_mlock <> nil);
-{$ENDIF}
-  @sodium_munlock := GetProcAddress(DLLHandle,'sodium_munlock');
-{$IFDEF WIN32}
-  Assert(@sodium_munlock <> nil);
-{$ENDIF}
-  @sodium_malloc := GetProcAddress(DLLHandle,'sodium_malloc');
-{$IFDEF WIN32}
-  Assert(@sodium_malloc <> nil);
-{$ENDIF}
-  @sodium_allocarray := GetProcAddress(DLLHandle,'sodium_allocarray');
-{$IFDEF WIN32}
-  Assert(@sodium_allocarray <> nil);
-{$ENDIF}
-  @sodium_free := GetProcAddress(DLLHandle,'sodium_free');
-{$IFDEF WIN32}
-  Assert(@sodium_free <> nil);
-{$ENDIF}
-  @sodium_mprotect_noaccess := GetProcAddress(DLLHandle,'sodium_mprotect_noaccess');
-{$IFDEF WIN32}
-  Assert(@sodium_mprotect_noaccess <> nil);
-{$ENDIF}
-  @sodium_mprotect_readonly := GetProcAddress(DLLHandle,'sodium_mprotect_readonly');
-{$IFDEF WIN32}
-  Assert(@sodium_mprotect_readonly <> nil);
-{$ENDIF}
-  @sodium_mprotect_readwrite := GetProcAddress(DLLHandle,'sodium_mprotect_readwrite');
-{$IFDEF WIN32}
-  Assert(@sodium_mprotect_readwrite <> nil);
-{$ENDIF}
-//  @_sodium_alloc_init := GetProcAddress(DLLHandle,'_sodium_alloc_init');
-//{$IFDEF WIN32}
-//  Assert(@_sodium_alloc_init <> nil);
-//{$ENDIF}
-  @sodium_version_string := GetProcAddress(DLLHandle,'sodium_version_string');
-{$IFDEF WIN32}
-  Assert(@sodium_version_string <> nil);
-{$ENDIF}
-  @sodium_library_version_major := GetProcAddress(DLLHandle,'sodium_library_version_major');
-{$IFDEF WIN32}
-  Assert(@sodium_library_version_major <> nil);
-{$ENDIF}
-  @sodium_library_version_minor := GetProcAddress(DLLHandle,'sodium_library_version_minor');
-{$IFDEF WIN32}
-  Assert(@sodium_library_version_minor <> nil);
-{$ENDIF}
-  @sodium_increment := GetProcAddress(DLLHandle,'sodium_increment');  // libsodium 1.0.4
+  {$IFDEF WIN32}
+    Assert(@randombytes_salsa20_implementation_name <> nil);
+  {$ENDIF}
+    @randombytes_salsa20_random := GetProcAddress(DLLHandle,'randombytes_salsa20_random');
+  {$IFDEF WIN32}
+    Assert(@randombytes_salsa20_random <> nil);
+  {$ENDIF}
+    @randombytes_salsa20_random_stir := GetProcAddress(DLLHandle,'randombytes_salsa20_random_stir');
+  {$IFDEF WIN32}
+    Assert(@randombytes_salsa20_random_stir <> nil);
+  {$ENDIF}
+  //  @randombytes_salsa20_random_uniform := GetProcAddress(DLLHandle,'randombytes_salsa20_random_uniform');
+  //{$IFDEF WIN32}
+  //  Assert(@randombytes_salsa20_random_uniform <> nil);
+  //{$ENDIF}
+    @randombytes_salsa20_random_buf := GetProcAddress(DLLHandle,'randombytes_salsa20_random_buf');
+  {$IFDEF WIN32}
+    Assert(@randombytes_salsa20_random_buf <> nil);
+  {$ENDIF}
+    @randombytes_salsa20_random_close := GetProcAddress(DLLHandle,'randombytes_salsa20_random_close');
+  {$IFDEF WIN32}
+    Assert(@randombytes_salsa20_random_close <> nil);
+  {$ENDIF}
+    @randombytes_sysrandom_implementation_name := GetProcAddress(DLLHandle,'randombytes_sysrandom_implementation_name');
+  {$IFDEF WIN32}
+    Assert(@randombytes_sysrandom_implementation_name <> nil);
+  {$ENDIF}
+    @randombytes_sysrandom := GetProcAddress(DLLHandle,'randombytes_sysrandom');
+  {$IFDEF WIN32}
+    Assert(@randombytes_sysrandom <> nil);
+  {$ENDIF}
+    @randombytes_sysrandom_stir := GetProcAddress(DLLHandle,'randombytes_sysrandom_stir');
+  {$IFDEF WIN32}
+    Assert(@randombytes_sysrandom_stir <> nil);
+  {$ENDIF}
+  //  @randombytes_sysrandom_uniform := GetProcAddress(DLLHandle,'randombytes_sysrandom_uniform');
+  //{$IFDEF WIN32}
+  //  Assert(@randombytes_sysrandom_uniform <> nil);
+  //{$ENDIF}
+    @randombytes_sysrandom_buf := GetProcAddress(DLLHandle,'randombytes_sysrandom_buf');
+  {$IFDEF WIN32}
+    Assert(@randombytes_sysrandom_buf <> nil);
+  {$ENDIF}
+    @randombytes_sysrandom_close := GetProcAddress(DLLHandle,'randombytes_sysrandom_close');
+  {$IFDEF WIN32}
+    Assert(@randombytes_sysrandom_close <> nil);
+  {$ENDIF}
+    @sodium_runtime_has_neon := GetProcAddress(DLLHandle,'sodium_runtime_has_neon');
+  {$IFDEF WIN32}
+    Assert(@sodium_runtime_has_neon <> nil);
+  {$ENDIF}
+    @sodium_runtime_has_sse2 := GetProcAddress(DLLHandle,'sodium_runtime_has_sse2');
+  {$IFDEF WIN32}
+    Assert(@sodium_runtime_has_sse2 <> nil);
+  {$ENDIF}
+    @sodium_runtime_has_sse3 := GetProcAddress(DLLHandle,'sodium_runtime_has_sse3');
+  {$IFDEF WIN32}
+    Assert(@sodium_runtime_has_sse3 <> nil);
+  {$ENDIF}
+    @sodium_memzero := GetProcAddress(DLLHandle,'sodium_memzero');
+  {$IFDEF WIN32}
+    Assert(@sodium_memzero <> nil);
+  {$ENDIF}
+    @sodium_memcmp := GetProcAddress(DLLHandle,'sodium_memcmp');
+  {$IFDEF WIN32}
+    Assert(@sodium_memcmp <> nil);
+  {$ENDIF}
+    @sodium_bin2hex := GetProcAddress(DLLHandle,'sodium_bin2hex');
+  {$IFDEF WIN32}
+    Assert(@sodium_bin2hex <> nil);
+  {$ENDIF}
+    @sodium_hex2bin := GetProcAddress(DLLHandle,'sodium_hex2bin');
+  {$IFDEF WIN32}
+    Assert(@sodium_hex2bin <> nil);
+  {$ENDIF}
+    @sodium_mlock := GetProcAddress(DLLHandle,'sodium_mlock');
+  {$IFDEF WIN32}
+    Assert(@sodium_mlock <> nil);
+  {$ENDIF}
+    @sodium_munlock := GetProcAddress(DLLHandle,'sodium_munlock');
+  {$IFDEF WIN32}
+    Assert(@sodium_munlock <> nil);
+  {$ENDIF}
+    @sodium_malloc := GetProcAddress(DLLHandle,'sodium_malloc');
+  {$IFDEF WIN32}
+    Assert(@sodium_malloc <> nil);
+  {$ENDIF}
+    @sodium_allocarray := GetProcAddress(DLLHandle,'sodium_allocarray');
+  {$IFDEF WIN32}
+    Assert(@sodium_allocarray <> nil);
+  {$ENDIF}
+    @sodium_free := GetProcAddress(DLLHandle,'sodium_free');
+  {$IFDEF WIN32}
+    Assert(@sodium_free <> nil);
+  {$ENDIF}
+    @sodium_mprotect_noaccess := GetProcAddress(DLLHandle,'sodium_mprotect_noaccess');
+  {$IFDEF WIN32}
+    Assert(@sodium_mprotect_noaccess <> nil);
+  {$ENDIF}
+    @sodium_mprotect_readonly := GetProcAddress(DLLHandle,'sodium_mprotect_readonly');
+  {$IFDEF WIN32}
+    Assert(@sodium_mprotect_readonly <> nil);
+  {$ENDIF}
+    @sodium_mprotect_readwrite := GetProcAddress(DLLHandle,'sodium_mprotect_readwrite');
+  {$IFDEF WIN32}
+    Assert(@sodium_mprotect_readwrite <> nil);
+  {$ENDIF}
+  //  @_sodium_alloc_init := GetProcAddress(DLLHandle,'_sodium_alloc_init');
+  //{$IFDEF WIN32}
+  //  Assert(@_sodium_alloc_init <> nil);
+  //{$ENDIF}
+    @sodium_version_string := GetProcAddress(DLLHandle,'sodium_version_string');
+  {$IFDEF WIN32}
+    Assert(@sodium_version_string <> nil);
+  {$ENDIF}
+    @sodium_library_version_major := GetProcAddress(DLLHandle,'sodium_library_version_major');
+  {$IFDEF WIN32}
+    Assert(@sodium_library_version_major <> nil);
+  {$ENDIF}
+    @sodium_library_version_minor := GetProcAddress(DLLHandle,'sodium_library_version_minor');
+  {$IFDEF WIN32}
+    Assert(@sodium_library_version_minor <> nil);
+  {$ENDIF}
+  // libsodium 1.0.4
+  @sodium_compare := GetProcAddress(DLLHandle,'sodium_compare');
+  @sodium_increment := GetProcAddress(DLLHandle,'sodium_increment');
+
+  @crypto_stream_chacha20_ietf_noncebytes := GetProcAddress(DLLHandle,'crypto_stream_chacha20_ietf_noncebytes');
+  @crypto_stream_chacha20_ietf := GetProcAddress(DLLHandle,'crypto_stream_chacha20_ietf');
+  @crypto_stream_chacha20_ietf_xor := GetProcAddress(DLLHandle,'crypto_stream_chacha20_ietf_xor');
+  @crypto_stream_chacha20_ietf_xor_ic := GetProcAddress(DLLHandle,'crypto_stream_chacha20_ietf_xor_ic');
+
+  @crypto_aead_chacha20poly1305_ietf_npubbytes := GetProcAddress(DLLHandle,'crypto_aead_chacha20poly1305_ietf_npubbytes');
+  @crypto_aead_chacha20poly1305_ietf_encrypt := GetProcAddress(DLLHandle,'crypto_aead_chacha20poly1305_ietf_encrypt');
+  @crypto_aead_chacha20poly1305_ietf_decrypt := GetProcAddress(DLLHandle,'crypto_aead_chacha20poly1305_ietf_decrypt');
+
+  // libsodium 1.0.6
+  @sodium_runtime_has_ssse3 := GetProcAddress(DLLHandle,'sodium_runtime_has_ssse3');
+  @sodium_runtime_has_sse41 := GetProcAddress(DLLHandle,'sodium_runtime_has_sse41');
+
   end
   else
   begin
