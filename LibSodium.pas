@@ -26,6 +26,7 @@
 //  the latest libsodium library releases can be found here:
 //  http://download.libsodium.org/libsodium/releases/
 //
+//  v0.13 - 2016-06-27, updated for deprecations through libsodium 1.10
 //  v0.12 - 2015-11-02, updated for deprecations and new features through libsodium 1.06
 //  v0.11 - 2015-08-08, a few minor changes for 64-bit compatibility
 //  v0.10 - 2015-08-06, initial release
@@ -2808,18 +2809,6 @@ begin
   {$IFDEF WIN32}
     Assert(@crypto_sign_ed25519_sk_to_pk <> nil);
   {$ENDIF}
-    @crypto_sign_edwards25519sha512batch_bytes := GetProcAddress(DLLHandle,'crypto_sign_edwards25519sha512batch_bytes');
-  {$IFDEF WIN32}
-    Assert(@crypto_sign_edwards25519sha512batch_bytes <> nil);
-  {$ENDIF}
-    @crypto_sign_edwards25519sha512batch_publickeybytes := GetProcAddress(DLLHandle,'crypto_sign_edwards25519sha512batch_publickeybytes');
-  {$IFDEF WIN32}
-    Assert(@crypto_sign_edwards25519sha512batch_publickeybytes <> nil);
-  {$ENDIF}
-    @crypto_sign_edwards25519sha512batch_secretkeybytes := GetProcAddress(DLLHandle,'crypto_sign_edwards25519sha512batch_secretkeybytes');
-  {$IFDEF WIN32}
-    Assert(@crypto_sign_edwards25519sha512batch_secretkeybytes <> nil);
-  {$ENDIF}
     @crypto_sign_edwards25519sha512batch := GetProcAddress(DLLHandle,'crypto_sign_edwards25519sha512batch');
   {$IFDEF WIN32}
     Assert(@crypto_sign_edwards25519sha512batch <> nil);
@@ -3031,54 +3020,6 @@ begin
     @randombytes := GetProcAddress(DLLHandle,'randombytes');
   {$IFDEF WIN32}
     Assert(@randombytes <> nil);
-  {$ENDIF}
-  @randombytes_salsa20_implementation_name := GetProcAddress(DLLHandle,'randombytes_salsa20_implementation_name');
-  {$IFDEF WIN32}
-    Assert(@randombytes_salsa20_implementation_name <> nil);
-  {$ENDIF}
-    @randombytes_salsa20_random := GetProcAddress(DLLHandle,'randombytes_salsa20_random');
-  {$IFDEF WIN32}
-    Assert(@randombytes_salsa20_random <> nil);
-  {$ENDIF}
-    @randombytes_salsa20_random_stir := GetProcAddress(DLLHandle,'randombytes_salsa20_random_stir');
-  {$IFDEF WIN32}
-    Assert(@randombytes_salsa20_random_stir <> nil);
-  {$ENDIF}
-  //  @randombytes_salsa20_random_uniform := GetProcAddress(DLLHandle,'randombytes_salsa20_random_uniform');
-  //{$IFDEF WIN32}
-  //  Assert(@randombytes_salsa20_random_uniform <> nil);
-  //{$ENDIF}
-    @randombytes_salsa20_random_buf := GetProcAddress(DLLHandle,'randombytes_salsa20_random_buf');
-  {$IFDEF WIN32}
-    Assert(@randombytes_salsa20_random_buf <> nil);
-  {$ENDIF}
-    @randombytes_salsa20_random_close := GetProcAddress(DLLHandle,'randombytes_salsa20_random_close');
-  {$IFDEF WIN32}
-    Assert(@randombytes_salsa20_random_close <> nil);
-  {$ENDIF}
-    @randombytes_sysrandom_implementation_name := GetProcAddress(DLLHandle,'randombytes_sysrandom_implementation_name');
-  {$IFDEF WIN32}
-    Assert(@randombytes_sysrandom_implementation_name <> nil);
-  {$ENDIF}
-    @randombytes_sysrandom := GetProcAddress(DLLHandle,'randombytes_sysrandom');
-  {$IFDEF WIN32}
-    Assert(@randombytes_sysrandom <> nil);
-  {$ENDIF}
-    @randombytes_sysrandom_stir := GetProcAddress(DLLHandle,'randombytes_sysrandom_stir');
-  {$IFDEF WIN32}
-    Assert(@randombytes_sysrandom_stir <> nil);
-  {$ENDIF}
-  //  @randombytes_sysrandom_uniform := GetProcAddress(DLLHandle,'randombytes_sysrandom_uniform');
-  //{$IFDEF WIN32}
-  //  Assert(@randombytes_sysrandom_uniform <> nil);
-  //{$ENDIF}
-    @randombytes_sysrandom_buf := GetProcAddress(DLLHandle,'randombytes_sysrandom_buf');
-  {$IFDEF WIN32}
-    Assert(@randombytes_sysrandom_buf <> nil);
-  {$ENDIF}
-    @randombytes_sysrandom_close := GetProcAddress(DLLHandle,'randombytes_sysrandom_close');
-  {$IFDEF WIN32}
-    Assert(@randombytes_sysrandom_close <> nil);
   {$ENDIF}
     @sodium_runtime_has_neon := GetProcAddress(DLLHandle,'sodium_runtime_has_neon');
   {$IFDEF WIN32}
