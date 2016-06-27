@@ -26,8 +26,8 @@
 //  the latest libsodium library releases can be found here:
 //  http://download.libsodium.org/libsodium/releases/
 //
-//  v0.13 - 2016-06-27, updated for deprecations through libsodium 1.10
-//  v0.12 - 2015-11-02, updated for deprecations and new features through libsodium 1.06
+//  v0.13 - 2016-06-27, updated for deprecations through libsodium 1.0.10
+//  v0.12 - 2015-11-02, updated for deprecations and new features through libsodium 1.0.6
 //  v0.11 - 2015-08-08, a few minor changes for 64-bit compatibility
 //  v0.10 - 2015-08-06, initial release
 //
