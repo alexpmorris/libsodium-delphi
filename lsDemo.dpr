@@ -27,7 +27,7 @@ begin
   writeln('Sha2 Hash = ',hexHash);
 
   randombytes_buf(@key, sizeof(key));
-  crypto_auth_hmacsha512(@hmacHash, @testMessage[1], length(testMessage), @key);
+  crypto_auth_hmacsha256(@hmacHash, @testMessage[1], length(testMessage), @key);
   SetLength(hexHash,ls_crypto_auth_hmacsha256_BYTES*2+1);
   sodium_bin2hex(@hexHash[1],length(hexHash),@hmacHash,ls_crypto_auth_hmacsha256_BYTES);
   writeln('HmacSha256 Hash = ',hexHash);
@@ -75,7 +75,7 @@ begin
 end;
 
 
-//https://blake2.net/ - BLAKE2 — fast secure hashing
+//https://blake2.net/ - BLAKE2 â€” fast secure hashing
 //  improved version of the SHA-3 finalist BLAKE. Like SHA-3, BLAKE2 offers the highest security,
 //  yet is fast as MD5 on 64-bit platforms and requires at least 33% less RAM than SHA-2 or SHA-3
 //  on low-end systems. The core algorithm of BLAKE2 is derived from ChaCha, a stream cipher designed
