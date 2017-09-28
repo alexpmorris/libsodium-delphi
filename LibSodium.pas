@@ -26,6 +26,7 @@
 //  the latest libsodium library releases can be found here:
 //  http://download.libsodium.org/libsodium/releases/
 //
+//  v0.14 - 2017-09-28, added additional functions and verified compatibility to libsodium 1.0.14
 //  v0.13 - 2016-06-27, updated for deprecations through libsodium 1.0.10
 //  v0.12 - 2015-11-02, updated for deprecations and new features through libsodium 1.0.6
 //  v0.11 - 2015-08-08, a few minor changes for 64-bit compatibility
@@ -128,6 +129,7 @@ const
   ls_crypto_auth_hmacsha512_BYTES = 64;
   ls_crypto_auth_hmacsha512_KEYBYTES = 32;
 
+  ls_crypto_randombytes_SEEDBYTES = 32;
   ls_crypto_box_curve25519xsalsa20poly1305_SEEDBYTES = 32;
   ls_crypto_box_curve25519xsalsa20poly1305_PUBLICKEYBYTES = 32;
   ls_crypto_box_curve25519xsalsa20poly1305_BEFORENMBYTES = 32;
@@ -1368,6 +1370,10 @@ type
   Trandombytes_buf = procedure(const buf: Pointer;
                                const size: dwSIZE_T) cdecl;
 
+  Trandombytes_buf_deterministic = procedure(const buf: Pointer;
+                                             const size: dwSIZE_T;
+											 const seed: PAnsiChar) cdecl;
+
   Trandombytes_random = function: UINT32 cdecl;
 
   Trandombytes_uniform = function(const upper_bound: UINT32): UINT32 cdecl;
@@ -1461,12 +1467,27 @@ type
                              out bin_len: dwSIZE_T;
                              const hex_end: PAnsiChar): Integer cdecl;
 
+  Tsodium_bin2base64 = function(const b64: PAnsiChar;
+                                const b64_maxlen: dwSIZE_T;
+                                const bin: PAnsiChar;
+                                const bin_len: dwSIZE_T;
+								const variant: Integer): PAnsiChar cdecl;
+
+  Tsodium_base642bin = function(const bin: PAnsiChar;
+                             const bin_maxlen: dwSIZE_T;
+                             const b64: PAnsiChar;
+                             const b64_len: dwSIZE_T;
+                             const ignore: PAnsiChar;
+                             out bin_len: dwSIZE_T;
+                             const b64_end: PAnsiChar;
+							 const variant: integer): Integer cdecl;
+								
   Tsodium_mlock = function(const addr: Pointer;
                            const len: dwSIZE_T): Integer cdecl;
 
   Tsodium_munlock = function(const addr: Pointer;
                              const len: dwSIZE_T): Integer cdecl;
-
+						 
   // * WARNING: sodium_malloc() and sodium_allocarray() are not general-purpose
   // * allocation functions.
   // *
@@ -1511,6 +1532,16 @@ type
 
   Tsodium_mprotect_readwrite = function(ptr: Pointer): Integer cdecl;
 
+  Tsodium_pad = function(var padded_buflen_p: dwSIZE_T;
+                         const buf: PAnsiChar;
+						 const unpadded_buflen: dwSIZE_T;
+						 const blocksize: dwSIZE_T): Integer cdecl;
+
+  Tsodium_unpad = function(var unpadded_buflen_p: dwSIZE_T;
+                           const buf: PAnsiChar;
+						   const padded_buflen: dwSIZE_T;
+						   const blocksize: dwSIZE_T): Integer cdecl;
+  
   T_sodium_alloc_init = function: Integer cdecl;
 
   Tsodium_version_string = function: PAnsiChar cdecl;
@@ -1523,7 +1554,7 @@ type
 
   Tsodium_free = procedure(ptr: Pointer) cdecl;
 
-  //libsodium 1.0.4
+  //libsodium 1.0.6
   Tsodium_compare = function(const b1: PAnsiChar;
                              const b2: PAnsiChar;
                              const len: dwSIZE_T): Integer cdecl;
@@ -1534,7 +1565,16 @@ type
   Tsodium_runtime_has_ssse3 = function: Integer cdecl;
 
   Tsodium_runtime_has_sse41 = function: Integer cdecl;
-
+  
+  Tsodium_runtime_has_avx = function: Integer cdecl;
+  
+  Tsodium_runtime_has_avx2 = function: Integer cdecl;
+  
+  Tsodium_runtime_has_avx512 = function: Integer cdecl;
+  
+  Tsodium_runtime_has_pclmul = function: Integer cdecl;
+  
+  Tsodium_runtime_has_aesni = function: Integer cdecl;
 
 var
   sodium_init: Tsodium_init;
@@ -1819,6 +1859,7 @@ var
   crypto_verify_64_bytes: Tcrypto_verify_64_bytes;
   crypto_verify_64: Tcrypto_verify_64;
   randombytes_buf: Trandombytes_buf;
+  randombytes_buf_deterministic: Trandombytes_buf_deterministic;
   randombytes_random: Trandombytes_random;
   randombytes_uniform: Trandombytes_uniform;
   randombytes_stir: Trandombytes_stir;
@@ -1845,6 +1886,8 @@ var
   sodium_memcmp: Tsodium_memcmp;
   sodium_bin2hex: Tsodium_bin2hex;
   sodium_hex2bin: Tsodium_hex2bin;
+  sodium_bin2base64: Tsodium_bin2base64;
+  sodium_base642bin: Tsodium_base642bin;
   sodium_mlock: Tsodium_mlock;
   sodium_munlock: Tsodium_munlock;
   sodium_malloc: Tsodium_malloc;
@@ -1853,16 +1896,23 @@ var
   sodium_mprotect_noaccess: Tsodium_mprotect_noaccess;
   sodium_mprotect_readonly: Tsodium_mprotect_readonly;
   sodium_mprotect_readwrite: Tsodium_mprotect_readwrite;
+  sodium_pad: Tsodium_pad;
+  sodium_unpad: Tsodium_unpad;
   _sodium_alloc_init: T_sodium_alloc_init;
   sodium_version_string: Tsodium_version_string;
   sodium_library_version_major: Tsodium_library_version_major;
   sodium_library_version_minor: Tsodium_library_version_minor;
 
-  //libsodium 1.0.4
+  //libsodium 1.0.6
   sodium_compare: Tsodium_compare;
   sodium_increment: Tsodium_increment;
   sodium_runtime_has_ssse3: Tsodium_runtime_has_ssse3;
   sodium_runtime_has_sse41: Tsodium_runtime_has_sse41;
+  sodium_runtime_has_avx: Tsodium_runtime_has_avx;
+  sodium_runtime_has_avx2: Tsodium_runtime_has_avx2;
+  sodium_runtime_has_avx512: Tsodium_runtime_has_avx512;
+  sodium_runtime_has_pclmul: Tsodium_runtime_has_pclmul;
+  sodium_runtime_has_aesni: Tsodium_runtime_has_aesni; 
 
 
 var
@@ -3114,6 +3164,20 @@ begin
   @sodium_runtime_has_ssse3 := GetProcAddress(DLLHandle,'sodium_runtime_has_ssse3');
   @sodium_runtime_has_sse41 := GetProcAddress(DLLHandle,'sodium_runtime_has_sse41');
 
+  // libsodium 1.0.12
+  @randombytes_buf_deterministic := GetProcAddress(DLLHandle,'randombytes_buf_deterministic');
+  
+  // libsodium 1.0.14
+  @sodium_runtime_has_avx := GetProcAddress(DLLHandle,'sodium_runtime_has_avx');
+  @sodium_runtime_has_avx2 := GetProcAddress(DLLHandle,'sodium_runtime_has_avx2');
+  @sodium_runtime_has_avx512 := GetProcAddress(DLLHandle,'sodium_runtime_has_avx512');
+  @sodium_runtime_has_pclmul := GetProcAddress(DLLHandle,'sodium_runtime_has_pclmul');
+  @sodium_runtime_has_aesni := GetProcAddress(DLLHandle,'sodium_runtime_has_aesni');
+  @sodium_bin2base64 := GetProcAddress(DLLHandle,'sodium_bin2base64');
+  @sodium_base642bin := GetProcAddress(DLLHandle,'sodium_base642bin');
+  @sodium_pad := GetProcAddress(DLLHandle,'sodium_pad');
+  @sodium_unpad := GetProcAddress(DLLHandle,'sodium_unpad');
+  
   end
   else
   begin

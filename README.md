@@ -18,7 +18,7 @@ Between the Delphi demo application, and the [original libsodium documentation l
 
 ## Requirements & Versions
 
-libsodium-delphi works with either the 32-bit or 64-bit libsodium.dll library version 1.0.11 (recent previous releases should work as well).  [Click here for precompiled libsodium DLLs.](https://download.libsodium.org/libsodium/releases/)
+libsodium-delphi works with either the 32-bit or 64-bit libsodium.dll library version 1.0.14 (recent previous releases should work as well).  [Click here for precompiled libsodium DLLs.](https://download.libsodium.org/libsodium/releases/)
 
 ## License
 
