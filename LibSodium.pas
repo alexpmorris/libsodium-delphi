@@ -26,7 +26,7 @@
 //  the latest libsodium library releases can be found here:
 //  http://download.libsodium.org/libsodium/releases/
 //
-//  v0.14 - 2017-09-28, added additional functions and verified compatibility to libsodium 1.0.14
+//  v0.14 - 2017-09-29, updated for deprecations and new functions through libsodium 1.0.14
 //  v0.13 - 2016-06-27, updated for deprecations through libsodium 1.0.10
 //  v0.12 - 2015-11-02, updated for deprecations and new features through libsodium 1.0.6
 //  v0.11 - 2015-08-08, a few minor changes for 64-bit compatibility
@@ -1177,31 +1177,6 @@ type
 
   Tcrypto_stream_aes128ctr_beforenmbytes = function: dwSIZE_T cdecl;
 
-  Tcrypto_stream_aes128ctr = function(const outBuf: PAnsiChar;
-                                      outlen: UINT64;
-                                      const n: PAnsiChar;
-                                      const k: PAnsiChar): Integer cdecl;
-
-  Tcrypto_stream_aes128ctr_xor = function(const outBuf: PAnsiChar;
-                                          const inBuf: PAnsiChar;
-                                          inlen: UINT64;
-                                          const n: PAnsiChar;
-                                          const k: PAnsiChar): Integer cdecl;
-
-  Tcrypto_stream_aes128ctr_beforenm = function(const c: PAnsiChar;
-                                               const k: PAnsiChar): Integer cdecl;
-
-  Tcrypto_stream_aes128ctr_afternm = function(const outBuf: PAnsiChar;
-                                              len: UINT64;
-                                              const nonce: PAnsiChar;
-                                              const c: PAnsiChar): Integer cdecl;
-
-  Tcrypto_stream_aes128ctr_xor_afternm = function(const outBuf: PAnsiChar;
-                                                  const inBuf: PAnsiChar;
-                                                  len: UINT64;
-                                                  const nonce: PAnsiChar;
-                                                  const c: PAnsiChar): Integer cdecl;
-
   // * WARNING: This is just a stream cipher. It is NOT authenticated encryption.
   // * While it provides some protection against eavesdropping, it does NOT
   // * provide any security against active attacks.
@@ -1820,11 +1795,6 @@ var
   crypto_stream_aes128ctr_keybytes: Tcrypto_stream_aes128ctr_keybytes;
   crypto_stream_aes128ctr_noncebytes: Tcrypto_stream_aes128ctr_noncebytes;
   crypto_stream_aes128ctr_beforenmbytes: Tcrypto_stream_aes128ctr_beforenmbytes;
-  crypto_stream_aes128ctr: Tcrypto_stream_aes128ctr;
-  crypto_stream_aes128ctr_xor: Tcrypto_stream_aes128ctr_xor;
-  crypto_stream_aes128ctr_beforenm: Tcrypto_stream_aes128ctr_beforenm;
-  crypto_stream_aes128ctr_afternm: Tcrypto_stream_aes128ctr_afternm;
-  crypto_stream_aes128ctr_xor_afternm: Tcrypto_stream_aes128ctr_xor_afternm;
   crypto_stream_chacha20_keybytes: Tcrypto_stream_chacha20_keybytes;
   crypto_stream_chacha20_noncebytes: Tcrypto_stream_chacha20_noncebytes;
   crypto_stream_chacha20: Tcrypto_stream_chacha20;
@@ -2891,38 +2861,11 @@ begin
   {$IFDEF WIN32}
     Assert(@crypto_stream_xor <> nil);
   {$ENDIF}
+
     @crypto_stream_aes128ctr_keybytes := GetProcAddress(DLLHandle,'crypto_stream_aes128ctr_keybytes');
-  {$IFDEF WIN32}
-    Assert(@crypto_stream_aes128ctr_keybytes <> nil);
-  {$ENDIF}
     @crypto_stream_aes128ctr_noncebytes := GetProcAddress(DLLHandle,'crypto_stream_aes128ctr_noncebytes');
-  {$IFDEF WIN32}
-    Assert(@crypto_stream_aes128ctr_noncebytes <> nil);
-  {$ENDIF}
     @crypto_stream_aes128ctr_beforenmbytes := GetProcAddress(DLLHandle,'crypto_stream_aes128ctr_beforenmbytes');
-  {$IFDEF WIN32}
-    Assert(@crypto_stream_aes128ctr_beforenmbytes <> nil);
-  {$ENDIF}
-    @crypto_stream_aes128ctr := GetProcAddress(DLLHandle,'crypto_stream_aes128ctr');
-  {$IFDEF WIN32}
-    Assert(@crypto_stream_aes128ctr <> nil);
-  {$ENDIF}
-    @crypto_stream_aes128ctr_xor := GetProcAddress(DLLHandle,'crypto_stream_aes128ctr_xor');
-  {$IFDEF WIN32}
-    Assert(@crypto_stream_aes128ctr_xor <> nil);
-  {$ENDIF}
-    @crypto_stream_aes128ctr_beforenm := GetProcAddress(DLLHandle,'crypto_stream_aes128ctr_beforenm');
-  {$IFDEF WIN32}
-    Assert(@crypto_stream_aes128ctr_beforenm <> nil);
-  {$ENDIF}
-    @crypto_stream_aes128ctr_afternm := GetProcAddress(DLLHandle,'crypto_stream_aes128ctr_afternm');
-  {$IFDEF WIN32}
-    Assert(@crypto_stream_aes128ctr_afternm <> nil);
-  {$ENDIF}
-    @crypto_stream_aes128ctr_xor_afternm := GetProcAddress(DLLHandle,'crypto_stream_aes128ctr_xor_afternm');
-  {$IFDEF WIN32}
-    Assert(@crypto_stream_aes128ctr_xor_afternm <> nil);
-  {$ENDIF}
+
     @crypto_stream_chacha20_keybytes := GetProcAddress(DLLHandle,'crypto_stream_chacha20_keybytes');
   {$IFDEF WIN32}
     Assert(@crypto_stream_chacha20_keybytes <> nil);
