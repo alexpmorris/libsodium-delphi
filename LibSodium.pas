@@ -32,6 +32,19 @@
 //  v0.11 - 2015-08-08, a few minor changes for 64-bit compatibility
 //  v0.10 - 2015-08-06, initial release
 //
+//  conversion table used for C++ -> delphi types
+//  const char ** const = PAnsiChar
+//  const unsigned char = const : PAnsiChar
+//  const unsigned char * = const : PAnsiChar
+//  size_t = dwSIZE_T
+//  size_t * const = out : dwSIZE_T
+//  uint8_t = UINT8
+//  unsigned char = byte
+//  unsigned char * = PAnsiChar
+//  unsigned char * const = PAnsiChar
+//  unsigned long long = UINT64
+//  void * const = Pointer
+
 
 {$IFDEF fpc}
   {$MODE delphi}{$H+}
@@ -246,11 +259,9 @@ const
   ls_crypto_sign_edwards25519sha512batch_PUBLICKEYBYTES = 32;
   ls_crypto_sign_edwards25519sha512batch_SECRETKEYBYTES = (32 + 32);
 
-  ls_crypto_stream_aes128ctr_KEYBYTES = 16;
-  ls_crypto_stream_aes128ctr_NONCEBYTES = 16;
-  ls_crypto_stream_aes128ctr_BEFORENMBYTES = 1408;
   ls_crypto_stream_chacha20_KEYBYTES = 32;
   ls_crypto_stream_chacha20_NONCEBYTES = 8;
+  ls_crypto_stream_chacha20_IETF_KEYBYTES = 32;
   ls_crypto_stream_chacha20_IETF_NONCEBYTES = 12;
   ls_crypto_stream_salsa20_KEYBYTES = 32;
   ls_crypto_stream_salsa20_NONCEBYTES = 8;
@@ -274,6 +285,12 @@ const
 
 
 type
+
+  crypto_secretstream_xchacha20poly1305_state = packed record
+    k: Array[0..ls_crypto_stream_chacha20_IETF_KEYBYTES-1] of UINT32;
+    nonce: Array[0..ls_crypto_stream_chacha20_ietf_NONCEBYTES-1] of UINT32;
+    _pad: Array[0..7] of Byte;
+  end {crypto_hash_sha256_state};
 
   Tcrypto_aead_chacha20poly1305_keybytes = function: dwSIZE_T cdecl;
   Tcrypto_aead_chacha20poly1305_nsecbytes = function: dwSIZE_T cdecl;
@@ -1171,12 +1188,54 @@ type
   // * Unless you know what you're doing, what you are looking for is probably
   // * the crypto_box functions.
 
-  Tcrypto_stream_aes128ctr_keybytes = function: dwSIZE_T cdecl;
+  Tcrypto_secretstream_xchacha20poly1305_abytes = function: dwSIZE_T cdecl;
 
-  Tcrypto_stream_aes128ctr_noncebytes = function: dwSIZE_T cdecl;
+  Tcrypto_secretstream_xchacha20poly1305_headerbytes = function: dwSIZE_T cdecl;
 
-  Tcrypto_stream_aes128ctr_beforenmbytes = function: dwSIZE_T cdecl;
+  Tcrypto_secretstream_xchacha20poly1305_keybytes = function: dwSIZE_T cdecl;
 
+  Tcrypto_secretstream_xchacha20poly1305_messagebytes_max = function: dwSIZE_T cdecl;
+  
+  Tcrypto_secretstream_xchacha20poly1305_tag_message = function: byte cdecl;
+  
+  Tcrypto_secretstream_xchacha20poly1305_tag_push = function: byte cdecl;
+  
+  Tcrypto_secretstream_xchacha20poly1305_tag_rekey = function: byte cdecl;
+  
+  Tcrypto_secretstream_xchacha20poly1305_tag_final = function: byte cdecl;
+  
+  Tcrypto_secretstream_xchacha20poly1305_statebytes = function: dwSIZE_T cdecl;
+  
+  Tcrypto_secretstream_xchacha20poly1305_keygen = procedure(const k: PAnsiChar) cdecl;
+  
+  Tcrypto_secretstream_xchacha20poly1305_init_push = function(var state: Pointer;
+                                                              header: PAnsiChar;
+															  k: PAnsiChar): integer cdecl;
+															  
+  Tcrypto_secretstream_xchacha20poly1305_push = function(var state: Pointer;
+                                                         c: PAnsiChar;
+														 clen_p: UINT64;
+														 const m: PAnsiChar;
+														 mlen: UINT64;
+														 const ad: PAnsiChar;
+														 adlen: UINT64;
+														 tag: byte): integer cdecl;
+
+  Tcrypto_secretstream_xchacha20poly1305_init_pull = function(var state: Pointer;
+                                                              header: PAnsiChar;
+															  k: PAnsiChar): integer cdecl;
+
+  Tcrypto_secretstream_xchacha20poly1305_pull = function(var state: Pointer;
+                                                         m: PAnsiChar;
+														 mlen_p: UINT64;
+														 tag_p: PAnsiChar;
+														 const c: PAnsiChar;
+														 clen: UINT64;
+														 const ad: PAnsiChar;
+														 adlen: UINT64): integer cdecl;
+
+  Tcrypto_secretstream_xchacha20poly1305_rekey = procedure(var state: PAnsiChar) cdecl;
+														 														 
   // * WARNING: This is just a stream cipher. It is NOT authenticated encryption.
   // * While it provides some protection against eavesdropping, it does NOT
   // * provide any security against active attacks.
@@ -1277,27 +1336,6 @@ type
                                           mlen: UINT64;
                                           const n: PAnsiChar;
                                           const k: PAnsiChar): Integer cdecl;
-
-  // * WARNING: This is just a stream cipher. It is NOT authenticated encryption.
-  // * While it provides some protection against eavesdropping, it does NOT
-  // * provide any security against active attacks.
-  // * Unless you know what you're doing, what you are looking for is probably
-  // * the crypto_box functions. 
-
-  Tcrypto_stream_salsa208_keybytes = function: dwSIZE_T cdecl;
-
-  Tcrypto_stream_salsa208_noncebytes = function: dwSIZE_T cdecl;
-
-  Tcrypto_stream_salsa208 = function(const c: PAnsiChar;
-                                     clen: UINT64;
-                                     const n: PAnsiChar;
-                                     const k: PAnsiChar): Integer cdecl;
-
-  Tcrypto_stream_salsa208_xor = function(const c: PAnsiChar;
-                                         const m: PAnsiChar;
-                                         mlen: UINT64;
-                                         const n: PAnsiChar;
-                                         const k: PAnsiChar): Integer cdecl;
 
   // * WARNING: This is just a stream cipher. It is NOT authenticated encryption.
   // * While it provides some protection against eavesdropping, it does NOT
@@ -1792,9 +1830,21 @@ var
   crypto_stream_primitive: Tcrypto_stream_primitive;
   crypto_stream: Tcrypto_stream;
   crypto_stream_xor: Tcrypto_stream_xor;
-  crypto_stream_aes128ctr_keybytes: Tcrypto_stream_aes128ctr_keybytes;
-  crypto_stream_aes128ctr_noncebytes: Tcrypto_stream_aes128ctr_noncebytes;
-  crypto_stream_aes128ctr_beforenmbytes: Tcrypto_stream_aes128ctr_beforenmbytes;
+  crypto_secretstream_xchacha20poly1305_abytes: Tcrypto_secretstream_xchacha20poly1305_abytes;
+  crypto_secretstream_xchacha20poly1305_headerbytes: Tcrypto_secretstream_xchacha20poly1305_headerbytes;
+  crypto_secretstream_xchacha20poly1305_keybytes: Tcrypto_secretstream_xchacha20poly1305_keybytes;
+  crypto_secretstream_xchacha20poly1305_messagebytes_max: Tcrypto_secretstream_xchacha20poly1305_messagebytes_max;
+  crypto_secretstream_xchacha20poly1305_tag_message: Tcrypto_secretstream_xchacha20poly1305_tag_message;
+  crypto_secretstream_xchacha20poly1305_tag_push: Tcrypto_secretstream_xchacha20poly1305_tag_push;
+  crypto_secretstream_xchacha20poly1305_tag_rekey: Tcrypto_secretstream_xchacha20poly1305_tag_rekey;
+  crypto_secretstream_xchacha20poly1305_tag_final: Tcrypto_secretstream_xchacha20poly1305_tag_final;
+  crypto_secretstream_xchacha20poly1305_statebytes: Tcrypto_secretstream_xchacha20poly1305_statebytes;
+  crypto_secretstream_xchacha20poly1305_keygen: Tcrypto_secretstream_xchacha20poly1305_keygen;
+  crypto_secretstream_xchacha20poly1305_init_push: Tcrypto_secretstream_xchacha20poly1305_init_push;
+  crypto_secretstream_xchacha20poly1305_push: Tcrypto_secretstream_xchacha20poly1305_push;
+  crypto_secretstream_xchacha20poly1305_init_pull: Tcrypto_secretstream_xchacha20poly1305_init_pull;
+  crypto_secretstream_xchacha20poly1305_pull: Tcrypto_secretstream_xchacha20poly1305_pull;
+  crypto_secretstream_xchacha20poly1305_rekey: Tcrypto_secretstream_xchacha20poly1305_rekey;
   crypto_stream_chacha20_keybytes: Tcrypto_stream_chacha20_keybytes;
   crypto_stream_chacha20_noncebytes: Tcrypto_stream_chacha20_noncebytes;
   crypto_stream_chacha20: Tcrypto_stream_chacha20;
@@ -1813,10 +1863,6 @@ var
   crypto_stream_salsa2012_noncebytes: Tcrypto_stream_salsa2012_noncebytes;
   crypto_stream_salsa2012: Tcrypto_stream_salsa2012;
   crypto_stream_salsa2012_xor: Tcrypto_stream_salsa2012_xor;
-  crypto_stream_salsa208_keybytes: Tcrypto_stream_salsa208_keybytes;
-  crypto_stream_salsa208_noncebytes: Tcrypto_stream_salsa208_noncebytes;
-  crypto_stream_salsa208: Tcrypto_stream_salsa208;
-  crypto_stream_salsa208_xor: Tcrypto_stream_salsa208_xor;
   crypto_stream_xsalsa20_keybytes: Tcrypto_stream_xsalsa20_keybytes;
   crypto_stream_xsalsa20_noncebytes: Tcrypto_stream_xsalsa20_noncebytes;
   crypto_stream_xsalsa20: Tcrypto_stream_xsalsa20;
@@ -2861,11 +2907,6 @@ begin
   {$IFDEF WIN32}
     Assert(@crypto_stream_xor <> nil);
   {$ENDIF}
-
-    @crypto_stream_aes128ctr_keybytes := GetProcAddress(DLLHandle,'crypto_stream_aes128ctr_keybytes');
-    @crypto_stream_aes128ctr_noncebytes := GetProcAddress(DLLHandle,'crypto_stream_aes128ctr_noncebytes');
-    @crypto_stream_aes128ctr_beforenmbytes := GetProcAddress(DLLHandle,'crypto_stream_aes128ctr_beforenmbytes');
-
     @crypto_stream_chacha20_keybytes := GetProcAddress(DLLHandle,'crypto_stream_chacha20_keybytes');
   {$IFDEF WIN32}
     Assert(@crypto_stream_chacha20_keybytes <> nil);
@@ -2921,22 +2962,6 @@ begin
     @crypto_stream_salsa2012_xor := GetProcAddress(DLLHandle,'crypto_stream_salsa2012_xor');
   {$IFDEF WIN32}
     Assert(@crypto_stream_salsa2012_xor <> nil);
-  {$ENDIF}
-    @crypto_stream_salsa208_keybytes := GetProcAddress(DLLHandle,'crypto_stream_salsa208_keybytes');
-  {$IFDEF WIN32}
-    Assert(@crypto_stream_salsa208_keybytes <> nil);
-  {$ENDIF}
-    @crypto_stream_salsa208_noncebytes := GetProcAddress(DLLHandle,'crypto_stream_salsa208_noncebytes');
-  {$IFDEF WIN32}
-    Assert(@crypto_stream_salsa208_noncebytes <> nil);
-  {$ENDIF}
-    @crypto_stream_salsa208 := GetProcAddress(DLLHandle,'crypto_stream_salsa208');
-  {$IFDEF WIN32}
-    Assert(@crypto_stream_salsa208 <> nil);
-  {$ENDIF}
-    @crypto_stream_salsa208_xor := GetProcAddress(DLLHandle,'crypto_stream_salsa208_xor');
-  {$IFDEF WIN32}
-    Assert(@crypto_stream_salsa208_xor <> nil);
   {$ENDIF}
     @crypto_stream_xsalsa20_keybytes := GetProcAddress(DLLHandle,'crypto_stream_xsalsa20_keybytes');
   {$IFDEF WIN32}
@@ -3120,6 +3145,22 @@ begin
   @sodium_base642bin := GetProcAddress(DLLHandle,'sodium_base642bin');
   @sodium_pad := GetProcAddress(DLLHandle,'sodium_pad');
   @sodium_unpad := GetProcAddress(DLLHandle,'sodium_unpad');
+  
+  @crypto_secretstream_xchacha20poly1305_abytes := GetProcAddress(DLLHandle,'crypto_secretstream_xchacha20poly1305_abytes');
+  @crypto_secretstream_xchacha20poly1305_headerbytes := GetProcAddress(DLLHandle,'crypto_secretstream_xchacha20poly1305_headerbytes');
+  @crypto_secretstream_xchacha20poly1305_keybytes := GetProcAddress(DLLHandle,'crypto_secretstream_xchacha20poly1305_keybytes');
+  @crypto_secretstream_xchacha20poly1305_messagebytes_max := GetProcAddress(DLLHandle,'crypto_secretstream_xchacha20poly1305_messagebytes_max');
+  @crypto_secretstream_xchacha20poly1305_tag_message := GetProcAddress(DLLHandle,'crypto_secretstream_xchacha20poly1305_tag_message');
+  @crypto_secretstream_xchacha20poly1305_tag_push := GetProcAddress(DLLHandle,'crypto_secretstream_xchacha20poly1305_tag_push');
+  @crypto_secretstream_xchacha20poly1305_tag_rekey := GetProcAddress(DLLHandle,'crypto_secretstream_xchacha20poly1305_tag_rekey');
+  @crypto_secretstream_xchacha20poly1305_tag_final := GetProcAddress(DLLHandle,'crypto_secretstream_xchacha20poly1305_tag_final');
+  @crypto_secretstream_xchacha20poly1305_statebytes := GetProcAddress(DLLHandle,'crypto_secretstream_xchacha20poly1305_statebytes');
+  @crypto_secretstream_xchacha20poly1305_keygen := GetProcAddress(DLLHandle,'crypto_secretstream_xchacha20poly1305_keygen');
+  @crypto_secretstream_xchacha20poly1305_init_push := GetProcAddress(DLLHandle,'crypto_secretstream_xchacha20poly1305_init_push');
+  @crypto_secretstream_xchacha20poly1305_push := GetProcAddress(DLLHandle,'crypto_secretstream_xchacha20poly1305_push');
+  @crypto_secretstream_xchacha20poly1305_init_pull := GetProcAddress(DLLHandle,'crypto_secretstream_xchacha20poly1305_init_pull');
+  @crypto_secretstream_xchacha20poly1305_pull := GetProcAddress(DLLHandle,'crypto_secretstream_xchacha20poly1305_pull');
+  @crypto_secretstream_xchacha20poly1305_rekey := GetProcAddress(DLLHandle,'crypto_secretstream_xchacha20poly1305_rekey');
   
   end
   else
