@@ -1,4 +1,4 @@
-program lsDemo;
+﻿program lsDemo;
 {$apptype console}
 
 //
@@ -10,15 +10,22 @@ program lsDemo;
 
 uses SysUtils, Classes, WinTypes, LibSodium;
 
+procedure WriteFunctionName(const AFunctionName: String);
+begin
+  WriteLn(Format('*** Function: %s ***', [AFunctionName]));
+end;
 
 //http://doc.libsodium.org/advanced/sha-2_hash_function.html
 //http://doc.libsodium.org/advanced/hmac-sha2.html
 procedure LibSodiumHmacSha2AuthDemo;
+const SFunctionName = 'LibSodiumHmacSha2AuthDemo';
 var testMessage,hexHash: AnsiString;
     sha2Hash: array [0..ls_crypto_hash_sha256_BYTES-1] of byte;
     hmacHash: array [0..ls_crypto_auth_hmacsha256_BYTES-1] of byte;
     key: array [0..ls_crypto_auth_hmacsha256_KEYBYTES-1] of byte;
 begin
+  WriteFunctionName(SFunctionName);
+
   testMessage := 'my test message';
 
   crypto_hash_sha256(@sha2Hash, @testMessage[1], length(testMessage));
@@ -37,11 +44,14 @@ end;
 
 //http://doc.libsodium.org/password_hashing/index.html
 procedure LibSodiumSalsa208sha256PasswordHashingDemo;
+const SFunctionName = 'LibSodiumSalsa208sha256PasswordHashingDemo';
 var password,hexHash: AnsiString;
     key: array [0..ls_crypto_box_SEEDBYTES-1] of byte;
     salt: array [0..ls_crypto_pwhash_scryptsalsa208sha256_SALTBYTES-1] of byte;
     hashed_password: array [0..ls_crypto_pwhash_scryptsalsa208sha256_STRBYTES-1] of byte;
 begin
+  WriteFunctionName(SFunctionName);
+
   // key derivation
   randombytes_buf(@salt, sizeof(salt));
   password := 'myPassword';
@@ -82,11 +92,14 @@ end;
 //  by Daniel J. Bernstein that has been proposed as a standard cipher for TLS.
 //http://doc.libsodium.org/hashing/generic_hashing.html
 procedure LibSodiumBlake2HashDemo;
+const SFunctionName = 'LibSodiumBlake2HashDemo';
 var testMessage,hexHash: AnsiString;
     hash: array [0..ls_crypto_generichash_BYTES-1] of byte;
     key: array [0..ls_crypto_generichash_KEYBYTES-1] of byte;
     state: crypto_generichash_state;
 begin
+  WriteFunctionName(SFunctionName);
+
   randombytes_buf(@key,ls_crypto_aead_chacha20poly1305_KEYBYTES);
   testMessage := 'my very important message';
   crypto_generichash(@hash, sizeof(hash), @testMessage[1], Length(testMessage), @key, length(key));
@@ -114,11 +127,14 @@ end;
 //      to prepend the tag.
 //http://doc.libsodium.org/secret-key_cryptography/aead.html
 procedure LibSodiumAeadChacha20poly1305Demo;
+const SFunctionName = 'LibSodiumAeadChacha20poly1305Demo';
 var testMessage,cryptBuf,additionalData: AnsiString;
     nonce: array [0..ls_crypto_aead_chacha20poly1305_NPUBBYTES-1] of byte;
     key: array [0..ls_crypto_aead_chacha20poly1305_KEYBYTES-1] of byte;
     cryptLen,decryptLen: UINT64;
 begin
+  WriteFunctionName(SFunctionName);
+
   randombytes_buf(@nonce,ls_crypto_aead_chacha20poly1305_NPUBBYTES);
   randombytes_buf(@key,ls_crypto_aead_chacha20poly1305_KEYBYTES);
   testMessage := 'my secret message';
@@ -151,12 +167,15 @@ end;
 //      to prepend the tag.
 //http://doc.libsodium.org/secret-key_cryptography/authenticated_encryption.html
 procedure LibSodiumCryptoSecretBoxDemo;
+const SFunctionName = 'LibSodiumCryptoSecretBoxDemo';
 var testMessage,cryptBuf: AnsiString;
     nonce: array [0..ls_crypto_secretbox_NONCEBYTES-1] of byte;
     key: array [0..ls_crypto_secretbox_KEYBYTES-1] of byte;
     cryptLen: UINT64;
     intNonce: UINT64 absolute nonce;  //nonce is 8 bytes, so can be directly mapped to a UINT64
 begin
+  WriteFunctionName(SFunctionName);
+
   randombytes_buf(@nonce,ls_crypto_secretbox_NONCEBYTES);
   randombytes_buf(@key,ls_crypto_secretbox_KEYBYTES);
   testMessage := 'my secret message';
@@ -186,11 +205,14 @@ end;
 
 //http://doc.libsodium.org/secret-key_cryptography/secret-key_authentication.html
 procedure LibSodiumCryptoAuthDemo;
-var testMessage,cryptBuf,hexMac: AnsiString;
+const SFunctionName = 'LibSodiumCryptoAuthDemo';
+var testMessage,hexMac: AnsiString;
     mac: array [0..ls_crypto_auth_BYTES-1] of byte;
     key: array [0..ls_crypto_auth_KEYBYTES-1] of byte;
     binLen: DWORD{dwSIZE_T};
 begin
+  WriteFunctionName(SFunctionName);
+
   randombytes_buf(@mac,ls_crypto_auth_BYTES);
   randombytes_buf(@key,ls_crypto_auth_KEYBYTES);
   testMessage := 'my authenticated message';
@@ -216,6 +238,7 @@ end;
 //http://doc.libsodium.org/advanced/scalar_multiplication.html
 //Curve25519, a state-of-the-art Diffie-Hellman function suitable for a wide variety of applications
 procedure LibSodiumCryptoDHCurve25519Demo;
+const SFunctionName = 'LibSodiumCryptoDHCurve25519Demo';
 var client_publickey,server_publickey: array [0..ls_crypto_box_PUBLICKEYBYTES-1] of byte;
     client_secretkey,server_secretkey: array [0..ls_crypto_box_SECRETKEYBYTES-1] of byte;
     scalarmult_q_by_client,scalarmult_q_by_server: array [0..ls_crypto_scalarmult_BYTES-1] of byte;
@@ -223,6 +246,8 @@ var client_publickey,server_publickey: array [0..ls_crypto_box_PUBLICKEYBYTES-1]
     h: crypto_generichash_state;
     hexBuf: AnsiString;
 begin
+  WriteFunctionName(SFunctionName);
+
   // Create client's secret and public keys
   randombytes(@client_secretkey, sizeof(client_secretkey));
   crypto_scalarmult_base(@client_publickey, @client_secretkey);
@@ -268,9 +293,11 @@ end;
 
 
 procedure LibSodiumRandomDemo;
+const SFunctionName = 'LibSodiumRandomDemo';
 var buf: array[0..7] of byte;
     i: integer;
 begin
+  WriteFunctionName(SFunctionName);
 
   write('randombytes_buf(8) = ');
   randombytes_buf(@buf,8);
@@ -287,9 +314,6 @@ end;
 
 
 procedure TestLibSodium;
-var rb: randombytes_implementation;
-    buf: array[0..7] of byte;
-    i: integer;
 begin
   if (not sodium_dllLoaded) then begin
     writeln('Fatal Error: could not load "'+sodium_dllFileName+'"! Missing a Dependency?');
