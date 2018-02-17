@@ -1935,6 +1935,8 @@ var
   sodium_dllLoaded: Boolean = False;  { is DLL (dynamically) loaded already? }
   sodium_dllFileName: AnsiString = 'libsodium.dll';
 
+procedure NewExit; far;
+procedure LoadDLL;
 
 implementation
 
@@ -1946,11 +1948,12 @@ var
   ErrorMode: Integer;
 {$ENDIF}
 
-  procedure NewExit; far;
-  begin
-    ExitProc := SaveExit;
-    FreeLibrary(DLLHandle)
-  end {NewExit};
+procedure NewExit; far;
+begin
+  ExitProc := SaveExit;
+  FreeLibrary(DLLHandle);
+  sodium_dllLoaded := False;
+end {NewExit};
 
 procedure LoadDLL;
 begin
@@ -3176,6 +3179,6 @@ begin
 end {LoadDLL};
 
 begin
-  LoadDLL;
+  //LoadDLL;
 end.
 
