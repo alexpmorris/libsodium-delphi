@@ -26,6 +26,7 @@
 //  the latest libsodium library releases can be found here:
 //  http://download.libsodium.org/libsodium/releases/
 //
+//  v0.16 - 2018-07-24, updated for new functions through libsodium 1.0.16
 //  v0.14 - 2017-09-29, updated for deprecations and new functions through libsodium 1.0.14
 //  v0.13 - 2016-06-27, updated for deprecations through libsodium 1.0.10
 //  v0.12 - 2015-11-02, updated for deprecations and new features through libsodium 1.0.6
@@ -55,7 +56,10 @@ unit libsodium;
 
 interface
 
-uses SysUtils, Wintypes, WinProcs;
+uses System.SysUtils, Winapi.Windows;
+
+const
+  sodium_wrapper_version_string = '1.0.16';
 
 {=> LIBSODIUM.H <=}
 
@@ -178,6 +182,8 @@ const
   ls_crypto_core_salsa208_INPUTBYTES = 16;
   ls_crypto_core_salsa208_KEYBYTES = 32;
   ls_crypto_core_salsa208_CONSTBYTES = 16;
+  ls_crypto_core_ed25519_BYTES = 32;
+  ls_crypto_core_ed25519_UNIFORMBYTES = 32;
 
   ls_crypto_generichash_blake2b_BYTES_MIN = 16;
   ls_crypto_generichash_blake2b_BYTES_MAX = 64;
@@ -223,6 +229,8 @@ const
   ls_crypto_scalarmult_BYTES = ls_crypto_scalarmult_curve25519_BYTES;
   ls_crypto_scalarmult_SCALARBYTES = ls_crypto_scalarmult_curve25519_SCALARBYTES;
   ls_crypto_scalarmult_PRIMITIVE = 'curve25519';
+  ls_crypto_scalarmult_ed25519_BYTES = 32;
+  ls_crypto_scalarmult_ed25519_SCALARBYTES = 32;
 
   ls_crypto_secretbox_xsalsa20poly1305_KEYBYTES = 32;
   ls_crypto_secretbox_xsalsa20poly1305_NONCEBYTES = 24;
@@ -624,6 +632,23 @@ type
                                                                  const n: PAnsiChar;
                                                                  const k: PAnsiChar): Integer cdecl;
 
+  Tcrypto_core_ed25519_bytes = function: dwSIZE_T cdecl;
+
+  Tcrypto_core_ed25519_uniformbytes = function: dwSIZE_T cdecl;
+
+  Tcrypto_core_ed25519_is_valid_point = function(const p: PAnsiChar): Integer cdecl;
+
+  Tcrypto_core_ed25519_add = function(const r: PAnsiChar;
+                                      const p: PAnsiChar;
+                                      const q: PAnsiChar): Integer cdecl;
+
+  Tcrypto_core_ed25519_sub = function(const r: PAnsiChar;
+                                      const p: PAnsiChar;
+                                      const q: PAnsiChar): Integer cdecl;
+
+  Tcrypto_core_ed25519_from_uniform = function(const p: PAnsiChar;
+                                               const r: PAnsiChar): Integer cdecl;
+
   Tcrypto_core_hsalsa20_outputbytes = function: dwSIZE_T cdecl;
 
   Tcrypto_core_hsalsa20_inputbytes = function: dwSIZE_T cdecl;
@@ -924,6 +949,14 @@ type
   Tcrypto_scalarmult_base = function(const q: PAnsiChar;
                                      const n: PAnsiChar): Integer cdecl;
 
+  /////
+  // NOTE: Do not use the result of this function directly.
+  //
+  // Hash the result with the public keys in order to compute a shared
+  // secret key: H(q || client_pk || server_pk)
+  //
+  // Or unless this is not an option, use the crypto_kx() API instead.
+  /////
   Tcrypto_scalarmult = function(const q: PAnsiChar;
                                 const n: PAnsiChar;
                                 const p: PAnsiChar): Integer cdecl;
@@ -932,12 +965,31 @@ type
 
   Tcrypto_scalarmult_curve25519_scalarbytes = function: dwSIZE_T cdecl;
 
+  /////
+  // NOTE: Do not use the result of this function directly.
+  //
+  // Hash the result with the public keys in order to compute a shared
+  // secret key: H(q || client_pk || server_pk)
+  //
+  // Or unless this is not an option, use the crypto_kx() API instead.
+  /////
   Tcrypto_scalarmult_curve25519 = function(const q: PAnsiChar;
                                            const n: PAnsiChar;
                                            const p: PAnsiChar): Integer cdecl;
 
   Tcrypto_scalarmult_curve25519_base = function(const q: PAnsiChar;
                                                 const n: PAnsiChar): Integer cdecl;
+
+  Tcrypto_scalarmult_ed25519_bytes = function: dwSIZE_T cdecl;
+
+  Tcrypto_scalarmult_ed25519_scalarbytes = function: dwSIZE_T cdecl;
+
+  Tcrypto_scalarmult_ed25519 = function(const q: PAnsiChar;
+                                        const n: PAnsiChar;
+                                        const p: PAnsiChar): Integer cdecl;
+
+  Tcrypto_scalarmult_ed25519_base = function(const q: PAnsiChar;
+                                             const n: PAnsiChar): Integer cdecl;
 
   Tcrypto_secretbox_keybytes = function: dwSIZE_T cdecl;
 
@@ -1456,6 +1508,8 @@ type
   Tsodium_memzero = procedure(const pnt: Pointer;
                               const len: dwSIZE_T) cdecl;
 
+  Tsodium_stackzero = procedure(const len: dwSIZE_T) cdecl;
+
   // * WARNING: sodium_memcmp() must be used to verify if two secret keys
   // * are equal, in constant time.
   // * It returns 0 if the keys are equal, and -1 if they differ.
@@ -1589,6 +1643,8 @@ type
   
   Tsodium_runtime_has_aesni = function: Integer cdecl;
 
+  Tsodium_runtime_has_rdrand = function: Integer; cdecl;
+
 var
   sodium_init: Tsodium_init;
   crypto_aead_chacha20poly1305_keybytes: Tcrypto_aead_chacha20poly1305_keybytes;
@@ -1671,6 +1727,12 @@ var
   crypto_box_curve25519xsalsa20poly1305_beforenm: Tcrypto_box_curve25519xsalsa20poly1305_beforenm;
   crypto_box_curve25519xsalsa20poly1305_afternm: Tcrypto_box_curve25519xsalsa20poly1305_afternm;
   crypto_box_curve25519xsalsa20poly1305_open_afternm: Tcrypto_box_curve25519xsalsa20poly1305_open_afternm;
+  crypto_core_ed25519_bytes: Tcrypto_core_ed25519_bytes;
+  crypto_core_ed25519_uniformbytes: Tcrypto_core_ed25519_uniformbytes;
+  crypto_core_ed25519_is_valid_point: Tcrypto_core_ed25519_is_valid_point;
+  crypto_core_ed25519_add: Tcrypto_core_ed25519_add;
+  crypto_core_ed25519_sub: Tcrypto_core_ed25519_sub;
+  crypto_core_ed25519_from_uniform: Tcrypto_core_ed25519_from_uniform;
   crypto_core_hsalsa20_outputbytes: Tcrypto_core_hsalsa20_outputbytes;
   crypto_core_hsalsa20_inputbytes: Tcrypto_core_hsalsa20_inputbytes;
   crypto_core_hsalsa20_keybytes: Tcrypto_core_hsalsa20_keybytes;
@@ -1768,6 +1830,10 @@ var
   crypto_scalarmult_curve25519_scalarbytes: Tcrypto_scalarmult_curve25519_scalarbytes;
   crypto_scalarmult_curve25519: Tcrypto_scalarmult_curve25519;
   crypto_scalarmult_curve25519_base: Tcrypto_scalarmult_curve25519_base;
+  crypto_scalarmult_ed25519_bytes: Tcrypto_scalarmult_ed25519_bytes;
+  crypto_scalarmult_ed25519_scalarbytes: Tcrypto_scalarmult_ed25519_scalarbytes;
+  crypto_scalarmult_ed25519: Tcrypto_scalarmult_ed25519;
+  crypto_scalarmult_ed25519_base: Tcrypto_scalarmult_ed25519_base;
   crypto_secretbox_keybytes: Tcrypto_secretbox_keybytes;
   crypto_secretbox_noncebytes: Tcrypto_secretbox_noncebytes;
   crypto_secretbox_macbytes: Tcrypto_secretbox_macbytes;
@@ -1928,12 +1994,20 @@ var
   sodium_runtime_has_avx2: Tsodium_runtime_has_avx2;
   sodium_runtime_has_avx512: Tsodium_runtime_has_avx512;
   sodium_runtime_has_pclmul: Tsodium_runtime_has_pclmul;
-  sodium_runtime_has_aesni: Tsodium_runtime_has_aesni; 
+  sodium_runtime_has_aesni: Tsodium_runtime_has_aesni;
+
+  //libsodium 1.0.16
+  sodium_stackzero: Tsodium_stackzero;
+  sodium_runtime_has_rdrand: Tsodium_runtime_has_rdrand;
 
 
 var
   sodium_dllLoaded: Boolean = False;  { is DLL (dynamically) loaded already? }
+{$IFDEF WIN64}
+  sodium_dllFileName: AnsiString = 'libsodium64.dll';
+{$ELSE}
   sodium_dllFileName: AnsiString = 'libsodium.dll';
+{$ENDIF}
 
 procedure NewExit; far;
 procedure LoadDLL;
@@ -1960,9 +2034,6 @@ begin
   if sodium_dllLoaded then Exit;
 {$IFNDEF MSDOS}
   ErrorMode := SetErrorMode($8000{SEM_NoOpenFileErrorBox});
-{$ENDIF}
-{$IFDEF WIN64}
-  if FileExists('libsodium64.dll') then sodium_dllFileName := 'libsodium64.dll';
 {$ENDIF}
 {$IF CompilerVersion >= 20.0} { Delphi 2009 unicode }
   DLLHandle := LoadLibrary(PWideChar(WideString(sodium_dllFileName)));
@@ -2285,6 +2356,30 @@ begin
     @crypto_box_curve25519xsalsa20poly1305_open_afternm := GetProcAddress(DLLHandle,'crypto_box_curve25519xsalsa20poly1305_open_afternm');
   {$IFDEF WIN32}
     Assert(@crypto_box_curve25519xsalsa20poly1305_open_afternm <> nil);
+  {$ENDIF}
+    @crypto_core_ed25519_bytes := GetProcAddress(DLLHandle,'crypto_core_ed25519_bytes');
+  {$IFDEF WIN32}
+    Assert(@crypto_core_ed25519_bytes <> nil);
+  {$ENDIF}
+    @crypto_core_ed25519_uniformbytes := GetProcAddress(DLLHandle,'crypto_core_ed25519_uniformbytes');
+  {$IFDEF WIN32}
+    Assert(@crypto_core_ed25519_uniformbytes <> nil);
+  {$ENDIF}
+    @crypto_core_ed25519_is_valid_point := GetProcAddress(DLLHandle,'crypto_core_ed25519_is_valid_point');
+  {$IFDEF WIN32}
+    Assert(@crypto_core_ed25519_is_valid_point <> nil);
+  {$ENDIF}
+    @crypto_core_ed25519_add := GetProcAddress(DLLHandle,'crypto_core_ed25519_add');
+  {$IFDEF WIN32}
+    Assert(@crypto_core_ed25519_add <> nil);
+  {$ENDIF}
+    @crypto_core_ed25519_sub := GetProcAddress(DLLHandle,'crypto_core_ed25519_sub');
+  {$IFDEF WIN32}
+    Assert(@crypto_core_ed25519_sub <> nil);
+  {$ENDIF}
+    @crypto_core_ed25519_from_uniform := GetProcAddress(DLLHandle,'crypto_core_ed25519_from_uniform');
+  {$IFDEF WIN32}
+    Assert(@crypto_core_ed25519_from_uniform <> nil);
   {$ENDIF}
     @crypto_core_hsalsa20_outputbytes := GetProcAddress(DLLHandle,'crypto_core_hsalsa20_outputbytes');
   {$IFDEF WIN32}
@@ -2673,6 +2768,22 @@ begin
     @crypto_scalarmult_curve25519_base := GetProcAddress(DLLHandle,'crypto_scalarmult_curve25519_base');
   {$IFDEF WIN32}
     Assert(@crypto_scalarmult_curve25519_base <> nil);
+  {$ENDIF}
+    @crypto_scalarmult_ed25519_bytes := GetProcAddress(DLLHandle,'crypto_scalarmult_ed25519_bytes');
+  {$IFDEF WIN32}
+    Assert(@crypto_scalarmult_ed25519_bytes <> nil);
+  {$ENDIF}
+    @crypto_scalarmult_ed25519_scalarbytes := GetProcAddress(DLLHandle,'crypto_scalarmult_ed25519_scalarbytes');
+  {$IFDEF WIN32}
+    Assert(@crypto_scalarmult_ed25519_scalarbytes <> nil);
+  {$ENDIF}
+    @crypto_scalarmult_ed25519 := GetProcAddress(DLLHandle,'crypto_scalarmult_ed25519');
+  {$IFDEF WIN32}
+    Assert(@crypto_scalarmult_ed25519 <> nil);
+  {$ENDIF}
+    @crypto_scalarmult_ed25519_base := GetProcAddress(DLLHandle,'crypto_scalarmult_ed25519_base');
+  {$IFDEF WIN32}
+    Assert(@crypto_scalarmult_ed25519_base <> nil);
   {$ENDIF}
     @crypto_secretbox_keybytes := GetProcAddress(DLLHandle,'crypto_secretbox_keybytes');
   {$IFDEF WIN32}
@@ -3148,6 +3259,11 @@ begin
   @sodium_base642bin := GetProcAddress(DLLHandle,'sodium_base642bin');
   @sodium_pad := GetProcAddress(DLLHandle,'sodium_pad');
   @sodium_unpad := GetProcAddress(DLLHandle,'sodium_unpad');
+
+  // libsodium 1.0.16
+  @sodium_runtime_has_rdrand := GetProcAddress(DLLHandle, 'sodium_runtime_has_rdrand');
+  @sodium_stackzero := GetProcAddress(DLLHandle, 'sodium_stackzero');
+
   
   @crypto_secretstream_xchacha20poly1305_abytes := GetProcAddress(DLLHandle,'crypto_secretstream_xchacha20poly1305_abytes');
   @crypto_secretstream_xchacha20poly1305_headerbytes := GetProcAddress(DLLHandle,'crypto_secretstream_xchacha20poly1305_headerbytes');

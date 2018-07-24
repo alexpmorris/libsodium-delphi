@@ -8,7 +8,7 @@
 //
 //
 
-uses SysUtils, Classes, WinTypes, LibSodium;
+uses System.SysUtils, System.Classes, Winapi.Windows, LibSodium;
 
 procedure WriteFunctionName(const AFunctionName: String);
 begin
@@ -315,15 +315,20 @@ end;
 
 procedure TestLibSodium;
 begin
+  LoadDll;
+
   if (not sodium_dllLoaded) then begin
     writeln('Fatal Error: could not load "'+sodium_dllFileName+'"! Missing a Dependency?');
     writeln('ie. MSVC v100 runtime requires mfc100.dll, msvcp100.dll, and msvcr100.dll');
+
+    writeln('Type [Enter] to continue...');
+    readln;
     halt;
   end;
 
   sodium_init;
 
-  writeln('delphi wrapper/bridge to '+sodium_dllFileName+' version = ',sodium_version_string);
+  writeln('delphi wrapper/bridge (version = ' + sodium_wrapper_version_string + ') to ' + sodium_dllFileName + ' (version = ' + sodium_version_string + ')');
   writeln;
 
   LibSodiumRandomDemo;
@@ -350,6 +355,8 @@ begin
   LibSodiumSalsa208sha256PasswordHashingDemo;
   writeln;
 
+  writeln('Type [Enter] to continue...');
+  readln;
 end;
 
 
